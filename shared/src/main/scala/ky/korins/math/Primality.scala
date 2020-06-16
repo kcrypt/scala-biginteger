@@ -102,8 +102,10 @@ private[math] object Primality {
       val last = count - 1
       do {
         // To fill the array with random integers
-        for (i <- 0 until n.numberLength) {
+        var i = 0
+        while (i < n.numberLength) {
           n.digits(i) = rnd.nextInt()
+          i += 1
         }
         // To fix to the correct bitLength
         n.digits(last) = (n.digits(last) | 0x80000000) >>> shiftCount
@@ -134,13 +136,14 @@ private[math] object Primality {
       Arrays.binarySearch(Primes, n.digits(0)) >= 0
     } else {
       // To check if 'n' is divisible by some prime of the table
-      for (i <- 1 until Primes.length) {
+      var i = 1
+      while (i < Primes.length) {
         if (Division.remainderArrayByInt(n.digits, n.numberLength, Primes(i)) == 0)
           return false
+        i += 1
       }
 
       // To set the number of iterations necessary for Miller-Rabin test
-      var i: Int = 0
       val bitLength = n.bitLength()
       i = 2
       while (bitLength < Bits(i)) {
@@ -193,13 +196,16 @@ private[math] object Primality {
 
     // To set the improved certainty of Miller-Rabin
     var certainty = 2
-    for (j <- startPoint.bitLength() until Bits(certainty)) {
-      certainty += 1
+    val shift = Bits(certainty) - startPoint.bitLength()
+    if (shift > 0) {
+      certainty += shift
     }
 
     // To calculate modules: N mod p1, N mod p2, ... for first primes.
-    for (i <- 0 until Primes.length) {
+    var i = 0
+    while (i < Primes.length) {
       modules(i) = Division.remainder(startPoint, Primes(i)) - gapSize
+      i += 1
     }
 
     val probPrime: BigInteger = startPoint.copy()
@@ -207,7 +213,8 @@ private[math] object Primality {
       // At this point, all numbers in the gap are initialized as probably primes
       Arrays.fill(isDivisible, false)
       // To discard multiples of first primes
-      for (i <-0 until Primes.length) {
+      i = 0
+      while (i < Primes.length) {
         modules(i) = (modules(i) + gapSize) % Primes(i)
         var j =
           if (modules(i) == 0) 0
@@ -216,15 +223,18 @@ private[math] object Primality {
           isDivisible(j) = true
           j += Primes(i)
         }
+        i += 1
       }
       // To execute Miller-Rabin for non-divisible numbers by all first primes
-      for (j <- 0 until gapSize) {
+      var j = 0
+      while (j < gapSize) {
         if (!isDivisible(j)) {
           Elementary.inplaceAdd(probPrime, j)
           if (millerRabin(probPrime, certainty)) {
             return probPrime
           }
         }
+        j += 1
       }
       Elementary.inplaceAdd(startPoint, gapSize)
     }
@@ -251,7 +261,8 @@ private[math] object Primality {
     val k = nMinus1.getLowestSetBit()
     val q = nMinus1.shiftRight(k)
     val rnd = new Random()
-    for (i <- 0 until t) {
+    var i = 0
+    while (i < t) {
       // To generate a witness 'x', first it use the primes of table
       if (i < Primes.length) {
         x = BiPrimes(i)
@@ -268,16 +279,19 @@ private[math] object Primality {
 
       y = x.modPow(q, n)
       if (!(y.isOne || y == nMinus1)) {
-        for (j <- 1 until k) {
+        var j = 1
+        while (j < k) {
           if (y != nMinus1) {
             y = y.multiply(y).mod(n)
             if (y.isOne)
               return false
           }
+          j += 1
         }
         if (y != nMinus1)
           return false
       }
+      i += 1
     }
     true
     // scalastyle:on return

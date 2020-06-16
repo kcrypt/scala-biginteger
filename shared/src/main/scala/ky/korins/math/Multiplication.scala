@@ -120,18 +120,22 @@ private[math] object Multiplication {
   def square(a: Array[Int], aLen: Int, res: Array[Int]): Array[Int] = {
     var carry = 0
 
-    for (i <- 0 until aLen) {
+    var i = 0
+    while (i < aLen) {
       carry = 0
-      for (j <- i + 1 until aLen) {
+      var j = i + 1
+      while (j < aLen) {
         val t = unsignedMultAddAdd(a(i), a(j), res(i + j), carry)
         res(i + j) = t.toInt
         carry = (t >>> 32).toInt
+        j += 1
       }
       res(i + aLen) = carry
+      i += 1
     }
     BitLevel.shiftLeftOneBit(res, res, aLen << 1)
     carry = 0
-    var i = 0
+    i = 0
     var index = 0
     while (i < aLen) {
       val t = unsignedMultAddAdd(a(i), a(i), res(index), carry)
@@ -406,7 +410,8 @@ private[math] object Multiplication {
 
   private def initialiseArrays(): Unit = {
     var fivePow = 1L
-    for (i <- 0 until 32) {
+    var i = 0
+    while (i < 32) {
       if (i <= 18) {
         BigFivePows(i) = BigInteger.valueOf(fivePow)
         BigTenPows(i) = BigInteger.valueOf(fivePow << i)
@@ -415,16 +420,19 @@ private[math] object Multiplication {
         BigFivePows(i) = BigFivePows(i - 1).multiply(BigFivePows(1))
         BigTenPows(i) = BigTenPows(i - 1).multiply(BigInteger.TEN)
       }
+      i += 1
     }
   }
 
   private def multiplyByInt(res: Array[Int], a: Array[Int], aSize: Int,
       factor: Int): Int = {
     var carry = 0
-    for (i <- 0 until aSize) {
+    var i = 0
+    while (i < aSize) {
       val t = unsignedMultAddAdd(a(i), factor, carry, 0)
       res(i) = t.toInt
       carry = (t >>> 32).toInt
+      i += 1
     }
     carry
   }
@@ -434,15 +442,19 @@ private[math] object Multiplication {
     if (a == b && aLen == bLen) {
       square(a, aLen, t)
     } else {
-      for (i <- 0 until aLen) {
+      var i = 0
+      while (i < aLen) {
         var carry = 0
         val aI = a(i)
-        for (j <- 0 until bLen) {
+        var j = 0
+        while (j < bLen) {
           val added = unsignedMultAddAdd(aI, b(j), t(i + j), carry)
           t(i + j) = added.toInt
           carry = (added >>> 32).toInt
+          j += 1
         }
         t(i + bLen) = carry
+        i += 1
       }
     }
   }

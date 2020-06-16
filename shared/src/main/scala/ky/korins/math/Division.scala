@@ -153,10 +153,12 @@ private[math] object Division {
           // Step D6: compensating addition
           guessDigit -= 1
           var carry: Long = 0
-          for (k <- 0 until normBLength) {
+          var k = 0
+          while (k < normBLength) {
             carry += (normA(j - normBLength + k) & UINT_MAX) + (normB(k) & UINT_MAX)
             normA(j - normBLength + k) = carry.toInt
             carry >>>= 32
+            k += 1
           }
         }
       }
@@ -595,10 +597,12 @@ private[math] object Division {
     y.numberLength = 1
     y.digits(0) = 1
     y.sign = 1
-    for (i <- 1 until n) {
+    var i = 1
+    while (i < n) {
       if (BitLevel.testBit(x.multiply(y), i)) {
         y.digits(i >> 5) |= (1 << (i & 31))
       }
+      i += 1
     }
     y
   }
@@ -642,13 +646,15 @@ private[math] object Division {
       bLen: Int, c: Int): Int = {
     var carry0: Int = 0 // unsigned
     var carry1: Int = 0 // signed
-    for (i <- 0 until bLen) {
+    var i = 0
+    while (i < bLen) {
       val nextCarry0 = Multiplication.unsignedMultAddAdd(b(i), c, carry0, 0)
       val nextCarry1 =
         (a(start + i) & UINT_MAX) - (nextCarry0 & UINT_MAX) + carry1.toLong
       a(start + i) = nextCarry1.toInt
       carry1 = (nextCarry1 >> 32).toInt
       carry0 = (nextCarry0 >> 32).toInt
+      i += 1
     }
 
     val finalCarry1 =
@@ -879,23 +885,29 @@ private[math] object Division {
     val modulusDigits = modulus.digits
     val modulusLen = modulus.numberLength
     var outerCarry: Int = 0 // unsigned
-    for (i <- 0 until modulusLen) {
+    var i = 0
+    while (i < modulusLen) {
       var innnerCarry: Int = 0 // unsigned
       val m = Multiplication.unsignedMultAddAdd(res(i), n2, 0, 0).toInt
-      for (j <- 0 until modulusLen) {
+      var j = 0
+      while (j < modulusLen) {
         val nextInnnerCarry =
           unsignedMultAddAdd(m, modulusDigits(j), res(i + j), innnerCarry)
         res(i + j) = nextInnnerCarry.toInt
         innnerCarry = (nextInnnerCarry >> 32).toInt
+        j += 1
       }
       val nextOuterCarry =
         (outerCarry & UINT_MAX) + (res(i + modulusLen) & UINT_MAX) + (innnerCarry & UINT_MAX)
       res(i + modulusLen) = nextOuterCarry.toInt
       outerCarry = (nextOuterCarry >> 32).toInt
+      i += 1
     }
     res(modulusLen << 1) = outerCarry
-    for (j <- 0 until modulusLen + 1) {
+    var j = 0
+    while (j <= modulusLen) {
       res(j) = res(j + modulusLen)
+      j += 1
     }
   }
 }

@@ -125,7 +125,8 @@ private[math] object Conversion {
 
         loop()
       } else {
-        for (i <- 0 until numberLength) {
+        var i = 0
+        while (i < numberLength) {
           var j = 0
           while (j < 8 && currentChar > 0) {
             resDigit = digits(i) >> (j << 2) & 0xf
@@ -133,6 +134,7 @@ private[math] object Conversion {
             result = Integer.toHexString(resDigit) + result
             j += 1
           }
+          i += 1
         }
       }
 
@@ -259,8 +261,10 @@ private[math] object Conversion {
           result = result.substring(0, index) + "." + result.substring(index)
         } else {
           // special case 2
-          for (j <- 0 until -index) {
+          var j = -index
+          while (j > 0) {
             result = "0" + result
+            j -= 1
           }
           result = "0." + result
         }

@@ -180,9 +180,11 @@ class BigInteger extends Number with Comparable[BigInteger] {
     if ((signum < -1) || (signum > 1))
       throw new NumberFormatException("Invalid signum value")
     if (signum == 0) {
-      for (i <- 0 until magnitude.length) {
+      var i = 0
+      while (i < magnitude.length) {
         if (magnitude(i) != 0)
           throw new NumberFormatException("signum-magnitude mismatch")
+        i += 1
       }
     }
 
@@ -219,8 +221,10 @@ class BigInteger extends Number with Comparable[BigInteger] {
       sign = 1
       numberLength = (numBits + 31) >> 5
       digits = new Array[Int](numberLength)
-      for (i <- 0 until numberLength) {
+      var i = 0
+      while (i < numberLength) {
         digits(i) = rnd.nextInt()
+        i += 1
       }
       digits(numberLength - 1) >>>= (-numBits) & 31
       this.cutOffLeadingZeroes()
@@ -485,8 +489,10 @@ class BigInteger extends Number with Comparable[BigInteger] {
     if (_hashCode != 0) {
       _hashCode
     } else {
-      for (i <- 0 until numberLength) {
+      var i = 0
+      while (i < numberLength) {
         _hashCode = _hashCode * 33 + digits(i)
+        i += 1
       }
       _hashCode = _hashCode * sign
       _hashCode
@@ -727,10 +733,12 @@ class BigInteger extends Number with Comparable[BigInteger] {
       digitIndex += 1
       if (digitIndex == numberLength)
         bytesInInteger = highBytes
-      for (i <- 0 until bytesInInteger) {
+      var i = 0
+      while (i < bytesInInteger) {
         bytesLen -= 1
         bytes(bytesLen) = digit.toByte
         digit >>= 8
+        i += 1
       }
     }
 
@@ -860,13 +868,17 @@ class BigInteger extends Number with Comparable[BigInteger] {
     if (highBytes != 0) {
       // Put the first bytes in the highest element of the int array
       if (firstNonzeroDigit != firstNonzeroDigitNotSet) {
-        for (j <- 0 until bytesLen) {
+        var j = 0
+        while (j < bytesLen) {
           digits(i) = (digits(i) << 8) | (byteValues(j) & 0xFF)
+          j += 1
         }
         digits(i) = ~digits(i)
       } else {
-        for (j <- 0 until bytesLen) {
+        var j = 0
+        while (j < bytesLen) {
           digits(i) = (digits(i) << 8) | (byteValues(j) & 0xFF)
+          j += 1
         }
         digits(i) = -digits(i)
       }
@@ -892,8 +904,10 @@ class BigInteger extends Number with Comparable[BigInteger] {
       i += 1
     }
     // Put the first bytes in the highest element of the int array
-    for (j <- 0 until bytesLen) {
+    var j = 0
+    while (j < bytesLen) {
       digits(i) = (digits(i) << 8) | (byteValues(j) & 0xFF)
+      j += 1
     }
   }
 
@@ -911,10 +925,12 @@ class BigInteger extends Number with Comparable[BigInteger] {
     }
 
     // Validate that there are no further sign characters
-    for (i <- startChar until stringLength0) {
+    var i = startChar
+    while (i < stringLength0) {
       val c = s.charAt(i)
       if (c == '+' || c == '-')
         throw new NumberFormatException("Illegal embedded sign character")
+      i += 1
     }
 
     /*
