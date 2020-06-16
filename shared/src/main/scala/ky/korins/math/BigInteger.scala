@@ -554,7 +554,8 @@ class BigInteger extends Number with Comparable[BigInteger] {
     if (m.sign <= 0)
       throw new ArithmeticException("BigInteger: modulus not positive")
 
-    var base = this
+    var base = if (signum < 0 || compareTo(m) >= 0) mod(m) else this
+
     if (m.isOne || (_exponent.sign > 0 && base.sign == 0)) {
       BigInteger.ZERO
     } else if (base.sign == 0 && _exponent.sign == 0) {
@@ -566,8 +567,8 @@ class BigInteger extends Number with Comparable[BigInteger] {
       }
       // From now on: (m > 0) and (exponent >= 0)
       val res =
-        if (m.testBit(0)) Division.oddModPow(base.abs(), _exponent, m)
-        else Division.evenModPow(base.abs(), _exponent, m)
+        if (m.testBit(0)) Division.oddModPow(base, _exponent, m)
+        else Division.evenModPow(base, _exponent, m)
       if ((base.sign < 0) && _exponent.testBit(0))
         m.subtract(BigInteger.ONE).multiply(res).mod(m)
       else
