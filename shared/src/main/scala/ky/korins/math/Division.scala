@@ -61,7 +61,7 @@ import BigInteger.QuotAndRem
  */
 private[math] object Division {
 
-  private final val UINT_MAX = 0xffffffffL
+  final val UINT_MAX = 0xffffffffL
 
   /** Divides an array by another array.
    *
@@ -647,8 +647,9 @@ private[math] object Division {
     var carry0: Int = 0 // unsigned
     var carry1: Int = 0 // signed
     var i = 0
+    val cu = c & UINT_MAX
     while (i < bLen) {
-      val nextCarry0 = Multiplication.unsignedMultAddAdd(b(i), c, carry0, 0)
+      val nextCarry0 = (b(i) & UINT_MAX) * cu + (carry0 & UINT_MAX)
       val nextCarry1 =
         (a(start + i) & UINT_MAX) - (nextCarry0 & UINT_MAX) + carry1.toLong
       a(start + i) = nextCarry1.toInt
@@ -880,19 +881,17 @@ private[math] object Division {
   }
 
   private def monReduction(res: Array[Int], modulus: BigInteger, n2: Int): Unit = {
-    import Multiplication._
-
     val modulusDigits = modulus.digits
     val modulusLen = modulus.numberLength
     var outerCarry: Int = 0 // unsigned
+    val n2u = n2 & UINT_MAX
     var i = 0
     while (i < modulusLen) {
       var innnerCarry: Int = 0 // unsigned
-      val m = Multiplication.unsignedMultAddAdd(res(i), n2, 0, 0).toInt
+      val m = ((res(i) & UINT_MAX) * n2u).toInt & UINT_MAX
       var j = 0
       while (j < modulusLen) {
-        val nextInnnerCarry =
-          unsignedMultAddAdd(m, modulusDigits(j), res(i + j), innnerCarry)
+        val nextInnnerCarry = m * (modulusDigits(j) & UINT_MAX) + (res(i + j) & UINT_MAX) + (innnerCarry & UINT_MAX)
         res(i + j) = nextInnnerCarry.toInt
         innnerCarry = (nextInnnerCarry >> 32).toInt
         j += 1

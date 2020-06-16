@@ -84,7 +84,7 @@ private[math] object Multiplication {
     if (resSign == 0) {
       BigInteger.ZERO
     } else if (aNumberLength == 1) {
-      val res: Long = unsignedMultAddAdd(aDigits(0), factor, 0, 0)
+      val res = (aDigits(0) & Division.UINT_MAX) * (factor & Division.UINT_MAX)
       val resLo = res.toInt
       val resHi = (res >>> 32).toInt
       if (resHi == 0) new BigInteger(resSign, resLo)
@@ -123,9 +123,10 @@ private[math] object Multiplication {
     var i = 0
     while (i < aLen) {
       carry = 0
+      val aI = a(i) & Division.UINT_MAX
       var j = i + 1
       while (j < aLen) {
-        val t = unsignedMultAddAdd(a(i), a(j), res(i + j), carry)
+        val t = aI * (a(j) & Division.UINT_MAX) + (res(i + j) & Division.UINT_MAX) + (carry & Division.UINT_MAX)
         res(i + j) = t.toInt
         carry = (t >>> 32).toInt
         j += 1
@@ -138,10 +139,11 @@ private[math] object Multiplication {
     i = 0
     var index = 0
     while (i < aLen) {
-      val t = unsignedMultAddAdd(a(i), a(i), res(index), carry)
+      val aI = a(i) & Division.UINT_MAX
+      val t = aI * aI + (res(index) & Division.UINT_MAX) + (carry & Division.UINT_MAX)
       res(index) = t.toInt
       index += 1
-      val t2 = (t >>> 32) + (res(index) & 0xFFFFFFFFL)
+      val t2 = (t >>> 32) + (res(index) & Division.UINT_MAX)
       res(index) = t2.toInt
       carry = (t2 >>> 32).toInt
       i += 1
@@ -149,17 +151,6 @@ private[math] object Multiplication {
     }
     res
   }
-
-  /** Computes the value unsigned ((uint)a*(uint)b + (uint)c + (uint)d).
-   *
-   *  @param a parameter 1
-   *  @param b parameter 2
-   *  @param c parameter 3
-   *  @param d parameter 4
-   *  @return value of expression
-   */
-  @inline def unsignedMultAddAdd(a: Int, b: Int, c: Int, d: Int): Long =
-    (a & 0xFFFFFFFFL) * (b & 0xFFFFFFFFL) + (c & 0xFFFFFFFFL) + (d & 0xFFFFFFFFL)
 
   /** Performs the multiplication with the Karatsuba's algorithm.
    *
@@ -317,7 +308,7 @@ private[math] object Multiplication {
       else 1
 
     if (resLength == 2) {
-      val v = unsignedMultAddAdd(a.digits(0), b.digits(0), 0, 0)
+      val v = (a.digits(0) & Division.UINT_MAX) * (b.digits(0) & Division.UINT_MAX)
       val valueLo = v.toInt
       val valueHi = (v >>> 32).toInt
       if (valueHi == 0) new BigInteger(resSign, valueLo)
@@ -428,8 +419,9 @@ private[math] object Multiplication {
       factor: Int): Int = {
     var carry = 0
     var i = 0
+    val uFactor = factor & Division.UINT_MAX
     while (i < aSize) {
-      val t = unsignedMultAddAdd(a(i), factor, carry, 0)
+      val t = (a(i) & Division.UINT_MAX) * uFactor + (carry & Division.UINT_MAX)
       res(i) = t.toInt
       carry = (t >>> 32).toInt
       i += 1
@@ -445,10 +437,10 @@ private[math] object Multiplication {
       var i = 0
       while (i < aLen) {
         var carry = 0
-        val aI = a(i)
+        val aI = a(i) & Division.UINT_MAX
         var j = 0
         while (j < bLen) {
-          val added = unsignedMultAddAdd(aI, b(j), t(i + j), carry)
+          val added = aI * (b(j) & Division.UINT_MAX) + (t(i + j) & Division.UINT_MAX) + (carry & Division.UINT_MAX)
           t(i + j) = added.toInt
           carry = (added >>> 32).toInt
           j += 1
