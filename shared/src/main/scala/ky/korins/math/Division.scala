@@ -757,6 +757,17 @@ private[math] object Division {
     result
   }
 
+  def slidingWindowSize(exponent: BigInteger): Int = {
+    val bits = exponent.bitLength()
+    if (bits <= 7) 2
+    else if (bits <= 36) 3
+    else if (bits <= 140) 4
+    else if (bits <= 450) 5
+    else if (bits <= 1303) 6
+    else if (bits <= 3529) 7
+    else 8
+  }
+
   /** The Montgomery modular exponentiation.
    *
    *  Implements the Montgomery modular exponentiation based in <i>The sliding
@@ -770,8 +781,12 @@ private[math] object Division {
    */
   def slidingWindow(x2: BigInteger, a2: BigInteger, exponent: BigInteger,
       modulus: BigInteger, n2: Int): BigInteger = {
+
+    val windowSize = slidingWindowSize(exponent)
+    val tableSize = 1 << windowSize
+
     // fill odd low pows of a2
-    val pows = new Array[BigInteger](8)
+    val pows = new Array[BigInteger](tableSize)
     var res: BigInteger = x2
     var lowexp: Int = 0
 
@@ -779,7 +794,7 @@ private[math] object Division {
     pows(0) = a2
     val x3 = monPro(a2, a2, modulus, n2)
     var i = 1
-    while (i <= 7) {
+    while (i < tableSize) {
       pows(i) = monPro(pows(i - 1), x3, modulus, n2)
       i += 1
     }
@@ -788,7 +803,7 @@ private[math] object Division {
       if (BitLevel.testBit(exponent, i)) {
         lowexp = 1
         acc3 = i
-        var j = Math.max(i - 3, 0)
+        var j = Math.max(i - windowSize, 0)
         while (j <= (i - 1)) {
           if (BitLevel.testBit(exponent, j)) {
             if (j < acc3) {
