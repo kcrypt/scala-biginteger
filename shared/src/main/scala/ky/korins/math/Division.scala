@@ -883,26 +883,25 @@ private[math] object Division {
   private def monReduction(res: Array[Int], modulus: BigInteger, n2: Int): Unit = {
     val modulusDigits = modulus.digits
     val modulusLen = modulus.numberLength
-    var outerCarry: Int = 0 // unsigned
+    var outerCarry: Long = 0 // unsigned
     val n2u = n2 & UINT_MAX
     var i = 0
     while (i < modulusLen) {
-      var innnerCarry: Int = 0 // unsigned
-      val m = ((res(i) & UINT_MAX) * n2u).toInt & UINT_MAX
+      var innnerCarry: Long = 0 // unsigned
+      val m = ((res(i) & UINT_MAX) * n2u) & UINT_MAX
       var j = 0
       while (j < modulusLen) {
-        val nextInnnerCarry = m * (modulusDigits(j) & UINT_MAX) + (res(i + j) & UINT_MAX) + (innnerCarry & UINT_MAX)
+        val nextInnnerCarry = m * (modulusDigits(j) & UINT_MAX) + (res(i + j) & UINT_MAX) + innnerCarry
         res(i + j) = nextInnnerCarry.toInt
-        innnerCarry = (nextInnnerCarry >> 32).toInt
+        innnerCarry = nextInnnerCarry >> 32
         j += 1
       }
-      val nextOuterCarry =
-        (outerCarry & UINT_MAX) + (res(i + modulusLen) & UINT_MAX) + (innnerCarry & UINT_MAX)
+      val nextOuterCarry = outerCarry + (res(i + modulusLen) & UINT_MAX) + innnerCarry
       res(i + modulusLen) = nextOuterCarry.toInt
-      outerCarry = (nextOuterCarry >> 32).toInt
+      outerCarry = nextOuterCarry >> 32
       i += 1
     }
-    res(modulusLen << 1) = outerCarry
+    res(modulusLen << 1) = outerCarry.toInt
     var j = 0
     while (j <= modulusLen) {
       res(j) = res(j + modulusLen)
