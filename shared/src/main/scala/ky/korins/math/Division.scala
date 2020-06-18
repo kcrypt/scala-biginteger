@@ -908,12 +908,12 @@ private[math] object Division {
       while (j < modulusLen) {
         val nextInnerCarry = m * (modulusDigits(j) & UINT_MAX) + (res(i + j) & UINT_MAX) + innerCarry
         res(i + j) = nextInnerCarry.toInt
-        innerCarry = nextInnerCarry >> 32
+        innerCarry = nextInnerCarry >>> 32
         j += 1
       }
       val nextOuterCarry = outerCarry + (res(i + modulusLen) & UINT_MAX) + innerCarry
       res(i + modulusLen) = nextOuterCarry.toInt
-      outerCarry = nextOuterCarry >> 32
+      outerCarry = nextOuterCarry >>> 32
       i += 1
     }
     res(modulusLen << 1) = outerCarry.toInt
