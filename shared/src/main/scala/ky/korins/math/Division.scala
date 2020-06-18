@@ -633,6 +633,17 @@ private[math] object Division {
     finalSubtraction(res, modulus)
   }
 
+  def monSquare(a: BigInteger, modulus: BigInteger, n2: Int): BigInteger = {
+    val modulusLen = modulus.numberLength
+    val res = new Array[Int]((modulusLen << 1) + 1)
+
+    val minLenA = Math.min(modulusLen, a.numberLength)
+
+    Multiplication.square(a.digits, minLenA, res)
+    monReduction(res, modulus, n2)
+    finalSubtraction(res, modulus)
+  }
+
   /** Multiplies an array and subtracts it from a subarray of another array.
    *
    *  @param a the array to subtract from
@@ -792,7 +803,7 @@ private[math] object Division {
 
     var acc3: Int = 0
     pows(0) = a2
-    val x3 = monPro(a2, a2, modulus, n2)
+    val x3 = monSquare(a2, modulus, n2)
     var i = 1
     while (i < tableSize) {
       pows(i) = monPro(pows(i - 1), x3, modulus, n2)
@@ -817,13 +828,13 @@ private[math] object Division {
         }
         j = acc3
         while (j <= i) {
-          res = monPro(res, res, modulus, n2)
+          res = monSquare(res, modulus, n2)
           j += 1
         }
         res = monPro(pows((lowexp - 1) >> 1), res, modulus, n2)
         i = acc3
       } else {
-        res = monPro(res, res, modulus, n2)
+        res = monSquare(res, modulus, n2)
       }
       i -= 1
     }
@@ -835,7 +846,7 @@ private[math] object Division {
     var res = x2
     var i = exponent.bitLength() - 1
     while (i >= 0) {
-      res = monPro(res, res, modulus, n2)
+      res = monSquare(res, modulus, n2)
       if (BitLevel.testBit(exponent, i))
         res = monPro(res, a2, modulus, n2)
       i -= 1

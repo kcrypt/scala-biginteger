@@ -429,25 +429,20 @@ private[math] object Multiplication {
     carry
   }
 
-  private def multPAP(a: Array[Int], b: Array[Int], t: Array[Int],
-      aLen: Int, bLen: Int): Unit = {
-    if (a == b && aLen == bLen) {
-      square(a, aLen, t)
-    } else {
-      var i = 0
-      while (i < aLen) {
-        var carry = 0
-        val aI = a(i) & Division.UINT_MAX
-        var j = 0
-        while (j < bLen) {
-          val added = aI * (b(j) & Division.UINT_MAX) + (t(i + j) & Division.UINT_MAX) + (carry & Division.UINT_MAX)
-          t(i + j) = added.toInt
-          carry = (added >>> 32).toInt
-          j += 1
-        }
-        t(i + bLen) = carry
-        i += 1
+  private def multPAP(a: Array[Int], b: Array[Int], t: Array[Int], aLen: Int, bLen: Int): Unit = {
+    var i = 0
+    while (i < aLen) {
+      var carry = 0
+      val aI = a(i) & Division.UINT_MAX
+      var j = 0
+      while (j < bLen) {
+        val added = aI * (b(j) & Division.UINT_MAX) + (t(i + j) & Division.UINT_MAX) + (carry & Division.UINT_MAX)
+        t(i + j) = added.toInt
+        carry = (added >>> 32).toInt
+        j += 1
       }
+      t(i + bLen) = carry
+      i += 1
     }
   }
 
