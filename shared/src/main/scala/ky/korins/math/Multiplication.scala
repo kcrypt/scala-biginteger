@@ -118,7 +118,7 @@ private[math] object Multiplication {
    *  @param aLen The length of the number to square.
    */
   def square(a: Array[Int], aLen: Int, res: Array[Int]): Array[Int] = {
-    var carry = 0
+    var carry: Long = 0
 
     var i = 0
     while (i < aLen) {
@@ -126,12 +126,12 @@ private[math] object Multiplication {
       val aI = a(i) & Division.UINT_MAX
       var j = i + 1
       while (j < aLen) {
-        val t = aI * (a(j) & Division.UINT_MAX) + (res(i + j) & Division.UINT_MAX) + (carry & Division.UINT_MAX)
+        val t = aI * (a(j) & Division.UINT_MAX) + (res(i + j) & Division.UINT_MAX) + carry
         res(i + j) = t.toInt
-        carry = (t >>> 32).toInt
+        carry = t >>> 32
         j += 1
       }
-      res(i + aLen) = carry
+      res(i + aLen) = carry.toInt
       i += 1
     }
     BitLevel.shiftLeftOneBit(res, res, aLen << 1)
@@ -140,12 +140,12 @@ private[math] object Multiplication {
     var index = 0
     while (i < aLen) {
       val aI = a(i) & Division.UINT_MAX
-      val t = aI * aI + (res(index) & Division.UINT_MAX) + (carry & Division.UINT_MAX)
+      val t = aI * aI + (res(index) & Division.UINT_MAX) + carry
       res(index) = t.toInt
       index += 1
       val t2 = (t >>> 32) + (res(index) & Division.UINT_MAX)
       res(index) = t2.toInt
-      carry = (t2 >>> 32).toInt
+      carry = t2 >>> 32
       i += 1
       index += 1
     }
