@@ -240,7 +240,7 @@ class BigIntegerModPowTest extends wordspec.AnyWordSpec {
     val eSign = 1
     val mSign = -1
     val aNumber = new BigInteger(aSign, aBytes)
-    assert(aBytes.deep == aNumber.toByteArray.deep)
+    assert(aBytes.toSeq == aNumber.toByteArray.toSeq)
     val exp = new BigInteger(eSign, eBytes)
     val modulus = new BigInteger(mSign, mBytes)
     assertThrows[ArithmeticException](aNumber.modPow(exp, modulus))

@@ -492,7 +492,7 @@ class BigIntegerConstructorsTest extends wordspec.AnyWordSpec {
     val radix = 10
     val rBytes = Array[Byte](5, -11, -31, 0)
     val aNumber = new BigInteger(value, radix)
-    assert(rBytes.deep == aNumber.toByteArray().deep)
+    assert(rBytes.toSeq == aNumber.toByteArray().toSeq)
     assert(1 == aNumber.signum())
   }
 
