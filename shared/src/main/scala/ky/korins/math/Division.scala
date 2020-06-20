@@ -929,11 +929,11 @@ private[math] object Division {
       outerCarry = nextOuterCarry >>> 32
       i += 1
     }
-    res(modulusLen << 1) = outerCarry.toInt
     i = 0
-    while (i <= modulusLen) {
+    while (i < modulusLen) {
       res(i) = res(i + modulusLen)
       i += 1
     }
+    res(modulusLen) = outerCarry.toInt
   }
 }
