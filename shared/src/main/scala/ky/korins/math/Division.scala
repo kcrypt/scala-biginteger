@@ -930,10 +930,10 @@ private[math] object Division {
       i += 1
     }
     res(modulusLen << 1) = outerCarry.toInt
-    var j = 0
-    while (j <= modulusLen) {
-      res(j) = res(j + modulusLen)
-      j += 1
+    i = 0
+    while (i <= modulusLen) {
+      res(i) = res(i + modulusLen)
+      i += 1
     }
   }
 }
