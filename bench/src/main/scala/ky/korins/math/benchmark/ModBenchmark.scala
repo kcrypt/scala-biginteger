@@ -24,6 +24,30 @@ class ModBenchmark extends BaseBenchmark {
   }
 
   @Benchmark
+  def scalajs_two(): Unit = {
+    sPrime1 mod sTWO
+    sPrime2 mod sTWO
+  }
+
+  @Benchmark
+  def scalajs_three(): Unit = {
+    sPrime1 mod sTHREE
+    sPrime2 mod sTHREE
+  }
+
+  @Benchmark
+  def native_two(): Unit = {
+    nPrime1 mod nTWO
+    nPrime2 mod nTWO
+  }
+
+  @Benchmark
+  def native_three(): Unit = {
+    nPrime1 mod nTHREE
+    nPrime2 mod nTHREE
+  }
+
+  @Benchmark
   def korinsky_two(): Unit = {
     kPrime1 mod kTWO
     kPrime2 mod kTWO

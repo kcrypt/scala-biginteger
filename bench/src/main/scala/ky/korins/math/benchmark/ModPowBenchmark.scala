@@ -4,7 +4,7 @@ import org.openjdk.jmh.annotations._
 
 @State(Scope.Benchmark)
 class ModPowBenchmark extends BaseBenchmark {
-  @Param(Array("128", "512", "1024"))
+  @Param(Array("128", "512", "1024", "4096", "8192"))
   override var bits: Int = 0
 
   @Setup
@@ -21,6 +21,30 @@ class ModPowBenchmark extends BaseBenchmark {
   def java_even(): Unit = {
     javaPrime1 modPow (javaPrime2, javaEven2)
     javaPrime2 modPow (javaPrime1, javaEven1)
+  }
+
+  @Benchmark
+  def scalajs_odd(): Unit = {
+    sPrime1 modPow (sPrime2, sPrime2)
+    sPrime2 modPow (sPrime1, sPrime1)
+  }
+
+  @Benchmark
+  def scalajs_even(): Unit = {
+    sPrime1 modPow (sPrime2, sEven2)
+    sPrime2 modPow (sPrime1, sEven1)
+  }
+
+  @Benchmark
+  def native_odd(): Unit = {
+    nPrime1 modPow (nPrime2, nPrime2)
+    nPrime2 modPow (nPrime1, nPrime1)
+  }
+
+  @Benchmark
+  def native_even(): Unit = {
+    nPrime1 modPow (nPrime2, nEven2)
+    nPrime2 modPow (nPrime1, nEven1)
   }
 
   @Benchmark

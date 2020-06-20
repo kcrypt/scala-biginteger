@@ -1,19 +1,27 @@
 package ky.korins.math.benchmark
 
-import java.math.{BigInteger => jBigInteger}
-
+import java.math.{BigInteger => nBigInteger}
+import ky.korins.math.benchmark.original.java.{BigInteger => jBigInteger}
+import ky.korins.math.benchmark.original.scalajs.{BigInteger => sBigInteger}
 import ky.korins.math.{BigInteger => kBigInteger}
 
 trait BaseBenchmark {
   var bits: Int
 
   val javaONE = jBigInteger.valueOf(1)
-  val kONE = kBigInteger.valueOf(1)
-
   val javaTWO = jBigInteger.valueOf(2)
-  val kTWO = kBigInteger.valueOf(2)
-
   val javaTHREE = jBigInteger.valueOf(3)
+
+  val sTWO = sBigInteger.valueOf(2)
+  val sONE = sBigInteger.valueOf(1)
+  val sTHREE = sBigInteger.valueOf(3)
+
+  val nTWO = nBigInteger.valueOf(2)
+  val nONE = nBigInteger.valueOf(1)
+  val nTHREE = nBigInteger.valueOf(3)
+
+  val kONE = kBigInteger.valueOf(1)
+  val kTWO = kBigInteger.valueOf(2)
   val kTHREE = kBigInteger.valueOf(3)
 
   var javaPrime1: jBigInteger = jBigInteger.valueOf(0)
@@ -21,6 +29,18 @@ trait BaseBenchmark {
 
   var javaEven1: jBigInteger = jBigInteger.valueOf(0)
   var javaEven2: jBigInteger = jBigInteger.valueOf(0)
+
+  var sPrime1: sBigInteger = sBigInteger.valueOf(0)
+  var sPrime2: sBigInteger = sBigInteger.valueOf(0)
+
+  var sEven1: sBigInteger = sBigInteger.valueOf(0)
+  var sEven2: sBigInteger = sBigInteger.valueOf(0)
+
+  var nPrime1: nBigInteger = nBigInteger.valueOf(0)
+  var nPrime2: nBigInteger = nBigInteger.valueOf(0)
+
+  var nEven1: nBigInteger = nBigInteger.valueOf(0)
+  var nEven2: nBigInteger = nBigInteger.valueOf(0)
 
   var kPrime1: kBigInteger = kBigInteger.valueOf(0)
   var kPrime2: kBigInteger = kBigInteger.valueOf(0)
@@ -30,15 +50,23 @@ trait BaseBenchmark {
 
   def setupNumbers(): Unit = {
     javaPrime1 = new jBigInteger(Numbers.primes_1(bits))
+    sPrime1 = new sBigInteger(Numbers.primes_1(bits))
+    nPrime1 = new nBigInteger(Numbers.primes_1(bits))
     kPrime1 = new kBigInteger(Numbers.primes_1(bits))
 
     javaEven1 = javaPrime1 subtract javaONE
+    sEven1 = sPrime1 subtract sONE
+    nEven1 = nPrime1 subtract nONE
     kEven1 = kPrime1 subtract kONE
 
     javaPrime2 = new jBigInteger(Numbers.primes_2(bits))
+    sPrime2 = new sBigInteger(Numbers.primes_2(bits))
+    nPrime2 = new nBigInteger(Numbers.primes_2(bits))
     kPrime2 = new kBigInteger(Numbers.primes_2(bits))
 
     javaEven2 = javaPrime2 subtract javaONE
+    sEven2 = sPrime2 subtract sONE
+    nEven2 = nPrime2 subtract nONE
     kEven2 = kPrime2 subtract kONE
   }
 }

@@ -24,6 +24,30 @@ class MultiplyBenchmark extends BaseBenchmark {
   }
 
   @Benchmark
+  def scalajs_two(): Unit = {
+    sPrime1 multiply sTWO
+    sPrime2 multiply sTWO
+  }
+
+  @Benchmark
+  def scalajs_big(): Unit = {
+    sPrime1 multiply sPrime2
+    sPrime2 multiply sPrime1
+  }
+
+  @Benchmark
+  def native_two(): Unit = {
+    nPrime1 multiply nTWO
+    nPrime2 multiply nTWO
+  }
+
+  @Benchmark
+  def native_big(): Unit = {
+    nPrime1 multiply nPrime2
+    nPrime2 multiply nPrime1
+  }
+
+  @Benchmark
   def korinsky_two(): Unit = {
     kPrime1 multiply kTWO
     kPrime2 multiply kTWO
