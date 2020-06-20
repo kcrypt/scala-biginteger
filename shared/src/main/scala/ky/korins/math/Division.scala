@@ -918,15 +918,15 @@ private[math] object Division {
       var j = 0
       while (j < modulusLen) {
         val idx = i + j
-        val nextInnerCarry = m * (modulusDigits(j) & UINT_MAX) + (res(idx) & UINT_MAX) + innerCarry
-        res(idx) = nextInnerCarry.toInt
-        innerCarry = nextInnerCarry >>> 32
+        innerCarry = m * (modulusDigits(j) & UINT_MAX) + (res(idx) & UINT_MAX) + innerCarry
+        res(idx) = innerCarry.toInt
+        innerCarry >>>= 32
         j += 1
       }
       val idx = i + modulusLen
-      val nextOuterCarry = outerCarry + (res(idx) & UINT_MAX) + innerCarry
-      res(idx) = nextOuterCarry.toInt
-      outerCarry = nextOuterCarry >>> 32
+      outerCarry = outerCarry + (res(idx) & UINT_MAX) + innerCarry
+      res(idx) = outerCarry.toInt
+      outerCarry >>>= 32
       i += 1
     }
     i = 0
