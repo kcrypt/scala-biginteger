@@ -126,8 +126,9 @@ private[math] object Multiplication {
       val aI = a(i) & Division.UINT_MAX
       var j = i + 1
       while (j < aLen) {
-        val t = aI * (a(j) & Division.UINT_MAX) + (res(i + j) & Division.UINT_MAX) + carry
-        res(i + j) = t.toInt
+        val idx = i + j
+        val t = aI * (a(j) & Division.UINT_MAX) + (res(idx) & Division.UINT_MAX) + carry
+        res(idx) = t.toInt
         carry = t >>> 32
         j += 1
       }

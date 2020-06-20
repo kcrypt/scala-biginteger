@@ -917,13 +917,15 @@ private[math] object Division {
       val m = ((res(i) & UINT_MAX) * n2u) & UINT_MAX
       var j = 0
       while (j < modulusLen) {
-        val nextInnerCarry = m * (modulusDigits(j) & UINT_MAX) + (res(i + j) & UINT_MAX) + innerCarry
-        res(i + j) = nextInnerCarry.toInt
+        val idx = i + j
+        val nextInnerCarry = m * (modulusDigits(j) & UINT_MAX) + (res(idx) & UINT_MAX) + innerCarry
+        res(idx) = nextInnerCarry.toInt
         innerCarry = nextInnerCarry >>> 32
         j += 1
       }
-      val nextOuterCarry = outerCarry + (res(i + modulusLen) & UINT_MAX) + innerCarry
-      res(i + modulusLen) = nextOuterCarry.toInt
+      val idx = i + modulusLen
+      val nextOuterCarry = outerCarry + (res(idx) & UINT_MAX) + innerCarry
+      res(idx) = nextOuterCarry.toInt
       outerCarry = nextOuterCarry >>> 32
       i += 1
     }
