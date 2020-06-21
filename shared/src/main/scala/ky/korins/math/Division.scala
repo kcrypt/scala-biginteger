@@ -607,40 +607,190 @@ private[math] object Division {
     y
   }
 
-  /** The Montgomery Product of two integers.
-   *
-   *  Implements the Montgomery Product of two integers represented by {@code
-   *  int} arrays. The arrays are supposed in <i>little endian</i> notation.
-   *
-   *  @param a The first factor of the product.
-   *  @param b The second factor of the product.
-   *  @param modulus The modulus of the operations. Z<sub>modulus</sub>.
-   *  @param n2 The digit modulus'[0].
-   *  @ar.org.fitc.ref "C. K. Koc - Analyzing and Comparing Montgomery
-   *                   Multiplication Algorithms"
-   *  @see #modPowOdd(BigInteger, BigInteger, BigInteger)
+  /**
+   * This is a mix of multiplication and montgomery reduction function
    */
   def monPro(a: BigInteger, b: BigInteger, modulus: BigInteger,
       n2: Int): BigInteger = {
+
+    val modulusDigits = modulus.digits
     val modulusLen = modulus.numberLength
     val res = new Array[Int]((modulusLen << 1) + 1)
 
-    val minLenA = Math.min(modulusLen, a.numberLength)
-    val minLenB = Math.min(modulusLen, b.numberLength)
+    val aDigits = a.digits
+    val aLen = Math.min(modulusLen, a.numberLength)
 
-    Multiplication.multArraysPAP(a.digits, minLenA, b.digits, minLenB, res)
-    monReduction(res, modulus, n2)
+    val bDigits = b.digits
+    val bLen = Math.min(modulusLen, b.numberLength)
+
+    var carry: Long = 0 // unsigned
+    val n2u = n2 & UINT_MAX
+
+    var j = 0
+    var i = 0
+    while (i < aLen) {
+      var multiplyCarry: Long = res(i) & UINT_MAX
+      val aI = aDigits(i) & UINT_MAX
+      multiplyCarry += aI * (bDigits(0) & UINT_MAX)
+
+      var modulusCarry = multiplyCarry & UINT_MAX
+      val n0 = ((modulusCarry & UINT_MAX) * n2u) & UINT_MAX
+
+      modulusCarry += n0 * (modulusDigits(0) & UINT_MAX)
+      res(i) = modulusCarry.toInt
+
+      modulusCarry >>>= 32
+      multiplyCarry >>>= 32
+
+      j = 1
+      while (j < bLen) {
+        val idx = i + j
+        multiplyCarry += aI * (bDigits(j) & UINT_MAX)
+        multiplyCarry += (res(idx) & UINT_MAX)
+        modulusCarry += multiplyCarry & UINT_MAX
+        multiplyCarry >>>= 32
+
+        modulusCarry += n0 * (modulusDigits(j) & UINT_MAX)
+        res(idx) = modulusCarry.toInt
+        modulusCarry >>>= 32
+
+        j += 1
+      }
+      // j is bLen here
+      while (j < modulusLen) {
+        val idx = i + j
+        multiplyCarry += (res(idx) & UINT_MAX)
+        modulusCarry += multiplyCarry & UINT_MAX
+        multiplyCarry >>>= 32
+
+        modulusCarry += n0 * (modulusDigits(j) & UINT_MAX)
+        res(idx) = modulusCarry.toInt
+        modulusCarry >>>= 32
+
+        j += 1
+      }
+
+      carry += multiplyCarry + modulusCarry
+      res(i + modulusLen) = carry.toInt
+      carry >>>= 32
+
+      i += 1
+    }
+    // i is aLen here
+    while (i < modulusLen) {
+      var multiplyCarry: Long = res(i) & UINT_MAX
+
+      var modulusCarry = multiplyCarry & UINT_MAX
+      val n0 = ((modulusCarry & UINT_MAX) * n2u) & UINT_MAX
+
+      modulusCarry += n0 * (modulusDigits(0) & UINT_MAX)
+      res(i) = modulusCarry.toInt
+
+      modulusCarry >>>= 32
+      multiplyCarry >>>= 32
+
+      j = 1
+      while (j < modulusLen) {
+        val idx = i + j
+        multiplyCarry += (res(idx) & UINT_MAX)
+        modulusCarry += multiplyCarry & UINT_MAX
+        multiplyCarry >>>= 32
+
+        modulusCarry += n0 * (modulusDigits(j) & UINT_MAX)
+        res(idx) = modulusCarry.toInt
+        modulusCarry >>>= 32
+
+        j += 1
+      }
+
+      carry += multiplyCarry + modulusCarry
+      res(i + modulusLen) = carry.toInt
+      carry >>>= 32
+
+      i += 1
+    }
+
+    System.arraycopy(res, modulusLen, res, 0, modulusLen)
+    res(modulusLen) = carry.toInt
+
     finalSubtraction(res, modulus)
   }
 
+  /**
+   * This is a mix of square multiplication with bitshift and montgomery reduction function
+   */
   def monSquare(a: BigInteger, modulus: BigInteger, n2: Int): BigInteger = {
+    val modulusDigits = modulus.digits
     val modulusLen = modulus.numberLength
     val res = new Array[Int]((modulusLen << 1) + 1)
 
-    val minLenA = Math.min(modulusLen, a.numberLength)
+    val aDigits = a.digits
+    val aLen = Math.min(modulusLen, a.numberLength)
 
-    Multiplication.square(a.digits, minLenA, res)
-    monReduction(res, modulus, n2)
+    var shiftCarry: Long = 0
+    var lastLeftBit = 0
+
+    var i = 0
+    var idx = 0
+    while (i < aLen) {
+      var multiplyCarry: Long = 0
+      val aI = aDigits(i) & UINT_MAX
+      var j = i + 1
+      while (j < aLen) {
+        val idx = i + j
+        val t = aI * (aDigits(j) & UINT_MAX) + (res(idx) & UINT_MAX) + multiplyCarry
+        res(idx) = t.toInt
+        multiplyCarry = t >>> 32
+        j += 1
+      }
+      res(i + aLen) = multiplyCarry.toInt
+
+      var iVal = res(idx)
+      var shifted = (iVal << 1) | lastLeftBit
+      val t = aI * aI + (shifted & UINT_MAX) + shiftCarry
+      res(idx) = t.toInt
+      lastLeftBit = iVal >>> 31
+      idx += 1
+
+      iVal = res(idx)
+      shifted = (iVal << 1) | lastLeftBit
+      val t2 = (t >>> 32) + (shifted & UINT_MAX)
+      res(idx) = t2.toInt
+      shiftCarry = t2 >>> 32
+      lastLeftBit = iVal >>> 31
+      idx += 1
+
+      i += 1
+    }
+
+    if (lastLeftBit != 0) {
+      res(aLen << 1) = lastLeftBit
+    }
+
+    var outerCarry: Long = 0 // unsigned
+    val n2u = n2 & UINT_MAX
+    i = 0
+    while (i < modulusLen) {
+      var innerCarry: Long = 0 // unsigned
+      val m = ((res(i) & UINT_MAX) * n2u) & UINT_MAX
+      var j = 0
+      while (j < modulusLen) {
+        val idx = i + j
+        innerCarry = m * (modulusDigits(j) & UINT_MAX) + (res(idx) & UINT_MAX) + innerCarry
+        res(idx) = innerCarry.toInt
+        innerCarry >>>= 32
+        j += 1
+      }
+      val idx = i + modulusLen
+      outerCarry = outerCarry + (res(idx) & UINT_MAX) + innerCarry
+      res(idx) = outerCarry.toInt
+      outerCarry >>>= 32
+      i += 1
+    }
+
+    System.arraycopy(res, modulusLen, res, 0, modulusLen)
+    res(modulusLen) = (shiftCarry + outerCarry).toInt
+
     finalSubtraction(res, modulus)
   }
 
@@ -904,36 +1054,5 @@ private[math] object Division {
       }
     }
     result
-  }
-
-  private def monReduction(res: Array[Int], modulus: BigInteger, n2: Int): Unit = {
-    val modulusDigits = modulus.digits
-    val modulusLen = modulus.numberLength
-    var outerCarry: Long = 0 // unsigned
-    val n2u = n2 & UINT_MAX
-    var i = 0
-    while (i < modulusLen) {
-      var innerCarry: Long = 0 // unsigned
-      val m = ((res(i) & UINT_MAX) * n2u) & UINT_MAX
-      var j = 0
-      while (j < modulusLen) {
-        val idx = i + j
-        innerCarry = m * (modulusDigits(j) & UINT_MAX) + (res(idx) & UINT_MAX) + innerCarry
-        res(idx) = innerCarry.toInt
-        innerCarry >>>= 32
-        j += 1
-      }
-      val idx = i + modulusLen
-      outerCarry = outerCarry + (res(idx) & UINT_MAX) + innerCarry
-      res(idx) = outerCarry.toInt
-      outerCarry >>>= 32
-      i += 1
-    }
-    i = 0
-    while (i < modulusLen) {
-      res(i) = res(i + modulusLen)
-      i += 1
-    }
-    res(modulusLen) = outerCarry.toInt
   }
 }
