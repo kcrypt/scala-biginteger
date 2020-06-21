@@ -1,3 +1,6 @@
 #!/bin/sh -e
 
-sbt clean test ++2.11.12 biginteger/publishLocal ++2.12.11 biginteger/publishLocal ++2.13.2 biginteger/publishLocal
+sbt clean test \
+  ++2.11.12 bigintegerNative/publishLocal bigintegerJS/publishLocal bigintegerJVM/publishLocal \
+  ++2.12.11 bigintegerJS/publishLocal bigintegerJVM/publishLocal \
+  ++2.13.2 bigintegerJS/publishLocal bigintegerJVM/publishLocal

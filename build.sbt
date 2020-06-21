@@ -57,6 +57,7 @@ lazy val bench = project.in(file("bench"))
       "org.openjdk.jmh" % "jmh-core" % "1.23",
       "org.openjdk.jmh" % "jmh-generator-annprocess" % "1.23",
     ),
+    crossScalaVersions := Seq(scala213),
     assemblyJarName in assembly := "bench.jar",
     mainClass in assembly := Some("org.openjdk.jmh.Main"),
     test in assembly := {},
