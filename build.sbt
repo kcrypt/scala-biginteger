@@ -34,9 +34,16 @@ skip in publish := true
 lazy val biginteger = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .crossType(CrossType.Full)
   .in(file("."))
+  .enablePlugins(BuildInfoPlugin)
   .settings(
     skip in publish := false,
     publishArtifact in Test := false,
+    buildInfoKeys := Seq(
+      BuildInfoKey.action("commit") {
+        scala.sys.process.Process("git rev-parse HEAD").!!.trim
+      }
+    ),
+    buildInfoPackage := "ky.korins.math",
     libraryDependencies ++= Seq(
       "org.scalatest" %%% "scalatest" % scalatestVersion % Test,
     )
