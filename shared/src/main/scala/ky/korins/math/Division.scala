@@ -946,17 +946,6 @@ private[math] object Division {
     result
   }
 
-  def slidingWindowSize(exponent: BigInteger): Int = {
-    val bits = exponent.bitLength()
-    if (bits <= 7) 2
-    else if (bits <= 36) 3
-    else if (bits <= 140) 4
-    else if (bits <= 450) 5
-    else if (bits <= 1303) 6
-    else if (bits <= 3529) 7
-    else 8
-  }
-
   /** The Montgomery modular exponentiation.
    *
    *  Implements the Montgomery modular exponentiation based in <i>The sliding
@@ -971,7 +960,7 @@ private[math] object Division {
   def slidingWindow(x2: BigInteger, a2: BigInteger, exponent: BigInteger,
       modulus: BigInteger, n2: Int): BigInteger = {
 
-    val windowSize = slidingWindowSize(exponent)
+    val windowSize = 3
     val tableSize = 1 << windowSize
 
     val modulusLen = modulus.numberLength
