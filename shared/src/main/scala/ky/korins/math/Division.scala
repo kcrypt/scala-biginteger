@@ -41,9 +41,11 @@
 
 package ky.korins.math
 
-import scala.annotation.tailrec
+import java.util.Arrays
 
+import scala.annotation.tailrec
 import BigInteger.QuotAndRem
+import ky.korins.math.Elementary.subtract
 
 /** Provides BigInteger division and modular arithmetic.
  *
@@ -278,12 +280,12 @@ private[math] object Division {
    *  @see #monPro(BigInteger, BigInteger, BigInteger, long)
    *  @see #monSquare(BigInteger, BigInteger, long)
    */
-  def finalSubtraction(res: Array[Int], modulus: BigInteger): BigInteger = {
+  def finalSubtraction(res: Array[Int], modulus: BigInteger): Unit  = {
     // skipping leading zeros
     val modulusLen = modulus.numberLength
+    val modulusDigits = modulus.digits
     var doSub = res(modulusLen) != 0
     if (!doSub) {
-      val modulusDigits = modulus.digits
       doSub = true
       var i = modulusLen - 1
       while (i >= 0) {
@@ -296,12 +298,9 @@ private[math] object Division {
         i -= 1
       }
     }
-    val result = new BigInteger(1, modulusLen + 1, res)
-    if (doSub)
-      Elementary.inplaceSubtract(result, modulus)
 
-    result.cutOffLeadingZeroes()
-    result
+    if (doSub)
+      subtract(res, res, modulusLen + 1, modulusDigits, modulusLen)
   }
 
   /** Return the greatest common divisor of two BigIntegers
@@ -607,21 +606,38 @@ private[math] object Division {
     y
   }
 
-  /**
-   * This is a mix of multiplication and montgomery reduction function
-   */
   def monPro(a: BigInteger, b: BigInteger, modulus: BigInteger,
-      n2: Int): BigInteger = {
-
-    val modulusDigits = modulus.digits
+    n2: Int): BigInteger = {
     val modulusLen = modulus.numberLength
     val res = new Array[Int]((modulusLen << 1) + 1)
 
-    val aDigits = a.digits
-    val aLen = Math.min(modulusLen, a.numberLength)
+    monPro(res, a.digits, b.digits, b.numberLength, modulus, n2)
 
-    val bDigits = b.digits
-    val bLen = Math.min(modulusLen, b.numberLength)
+    val result = new BigInteger(1, modulusLen + 1, res)
+    result.cutOffLeadingZeroes()
+    result
+  }
+
+  private def numberLength(digits: Array[Int]): Int = {
+    var numberLength = digits.length - 1
+    while (numberLength >= 0 && digits(numberLength) == 0) {
+      numberLength -= 1
+    }
+    numberLength + 1
+  }
+
+  /**
+   * This is a mix of multiplication and montgomery reduction function
+   */
+  def monPro(res: Array[Int], aDigits: Array[Int], bDigits: Array[Int], bNumberLength: Int,
+    modulus: BigInteger, n2: Int): Array[Int] = {
+
+    val modulusDigits = modulus.digits
+    val modulusLen = modulus.numberLength
+
+    Arrays.fill(res, 0)
+    val aLen = Math.min(modulusLen, numberLength(aDigits))
+    val bLen = Math.min(modulusLen, bNumberLength)
 
     var carry: Long = 0 // unsigned
     val n2u = n2 & UINT_MAX
@@ -714,18 +730,29 @@ private[math] object Division {
     res(modulusLen) = carry.toInt
 
     finalSubtraction(res, modulus)
+    res
+  }
+
+  def monSquare(a: BigInteger, modulus: BigInteger, n2: Int): BigInteger = {
+    val modulusLen = modulus.numberLength
+    val res = new Array[Int]((modulusLen << 1) + 1)
+
+    monSquare(res, a.digits, modulus, n2)
+
+    val result = new BigInteger(1, modulusLen + 1, res)
+    result.cutOffLeadingZeroes()
+    result
   }
 
   /**
    * This is a mix of square multiplication with bitshift and montgomery reduction function
    */
-  def monSquare(a: BigInteger, modulus: BigInteger, n2: Int): BigInteger = {
+  def monSquare(res: Array[Int], aDigits: Array[Int], modulus: BigInteger, n2: Int): Array[Int] = {
     val modulusDigits = modulus.digits
     val modulusLen = modulus.numberLength
-    val res = new Array[Int]((modulusLen << 1) + 1)
 
-    val aDigits = a.digits
-    val aLen = Math.min(modulusLen, a.numberLength)
+    Arrays.fill(res, 0)
+    val aLen = Math.min(modulusLen, numberLength(aDigits))
 
     var shiftCarry: Long = 0
     var lastLeftBit = 0
@@ -792,6 +819,7 @@ private[math] object Division {
     res(modulusLen) = (shiftCarry + outerCarry).toInt
 
     finalSubtraction(res, modulus)
+    res
   }
 
   /** Multiplies an array and subtracts it from a subarray of another array.
@@ -946,9 +974,13 @@ private[math] object Division {
     val windowSize = slidingWindowSize(exponent)
     val tableSize = 1 << windowSize
 
+    val modulusLen = modulus.numberLength
+    var res_current = new Array[Int]((modulusLen << 1) + 1)
+    var res_last = new Array[Int]((modulusLen << 1) + 1)
+    System.arraycopy(x2.digits, 0, res_last, 0, Math.min(modulusLen, x2.numberLength))
+
     // fill odd low pows of a2
     val pows = new Array[BigInteger](tableSize)
-    var res: BigInteger = x2
     var lowexp: Int = 0
 
     var acc3: Int = 0
@@ -978,30 +1010,52 @@ private[math] object Division {
         }
         j = acc3
         while (j <= i) {
-          res = monSquare(res, modulus, n2)
+          val res = monSquare(res_current, res_last, modulus, n2)
+          res_current = res_last
+          res_last = res
           j += 1
         }
-        res = monPro(pows((lowexp - 1) >> 1), res, modulus, n2)
+        val pow = pows((lowexp - 1) >> 1)
+        val res = monPro(res_current, res_last, pow.digits, pow.numberLength, modulus, n2)
+        res_current = res_last
+        res_last = res
         i = acc3
       } else {
-        res = monSquare(res, modulus, n2)
+        val res = monSquare(res_current, res_last, modulus, n2)
+        res_current = res_last
+        res_last = res
       }
       i -= 1
     }
-    res
+
+    val result = new BigInteger(1, modulusLen + 1, res_last)
+    result.cutOffLeadingZeroes()
+    result
   }
 
   def squareAndMultiply(x2: BigInteger, a2: BigInteger, exponent: BigInteger,
       modulus: BigInteger, n2: Int): BigInteger = {
-    var res = x2
+    val modulusLen = modulus.numberLength
+    var res_current = new Array[Int]((modulusLen << 1) + 1)
+    var res_last = new Array[Int]((modulusLen << 1) + 1)
+
+    System.arraycopy(x2.digits, 0, res_last, 0, Math.min(modulusLen, x2.numberLength))
     var i = exponent.bitLength() - 1
     while (i >= 0) {
-      res = monSquare(res, modulus, n2)
-      if (BitLevel.testBit(exponent, i))
-        res = monPro(res, a2, modulus, n2)
+      val res = monSquare(res_current, res_last, modulus, n2)
+      res_current = res_last
+      res_last = res
+      if (BitLevel.testBit(exponent, i)) {
+        val res = monPro(res_current, res_last, a2.digits, a2.numberLength, modulus, n2)
+        res_current = res_last
+        res_last = res
+      }
       i -= 1
     }
-    res
+
+    val result = new BigInteger(1, modulusLen + 1, res_last)
+    result.cutOffLeadingZeroes()
+    result
   }
 
   /** Calculate the first digit of the inverse. */

@@ -410,7 +410,7 @@ private[math] object Elementary {
    *
    *  It is assumed the magnitude of a is not less than the magnitude of b.
    */
-  private def subtract(res: Array[Int], a: Array[Int], aSize: Int,
+  def subtract(res: Array[Int], a: Array[Int], aSize: Int,
       b: Array[Int], bSize: Int): Unit = {
     var i: Int = 0
     var borrow: Int = 0 // signed
