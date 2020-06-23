@@ -183,7 +183,7 @@ private[math] object Conversion {
         var i: Int = tempLen - 1
         while (i >= 0) {
           val temp1 = (rem.toLong << 32) + (temp(i) & 0xFFFFFFFFL)
-          val quot = java.lang.Long.divideUnsigned(temp1, 1000000000L).toInt
+          val quot = Long.divideUnsigned(temp1, 1000000000L).toInt
           temp(i) = quot
           rem = (temp1 - quot * 1000000000L).toInt
           i -= 1
