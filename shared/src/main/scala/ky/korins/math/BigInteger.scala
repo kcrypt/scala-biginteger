@@ -859,20 +859,14 @@ class BigInteger extends Number with Comparable[BigInteger] {
   }
 
   private[math] def cutOffLeadingZeroes(): Unit = {
-    @inline
-    @tailrec
-    def loop(): Unit = {
-      if (numberLength > 0) {
-        numberLength -= 1
-        if (digits(numberLength) == 0) loop()
-      }
+    var len = numberLength - 1
+    while (len > 0 && digits(len) == 0) {
+      len -= 1
     }
-
-    loop()
-    if (digits(numberLength) == 0) {
+    if (digits(len) == 0) {
       sign = 0
     }
-    numberLength += 1
+    numberLength = len + 1
   }
 
   private[math] def equalsArrays(b: Array[Int]): Boolean = {
