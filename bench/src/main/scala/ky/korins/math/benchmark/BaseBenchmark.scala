@@ -26,24 +26,28 @@ trait BaseBenchmark {
 
   var javaPrime1: jBigInteger = jBigInteger.valueOf(0)
   var javaPrime2: jBigInteger = jBigInteger.valueOf(0)
+  var javaPrimeHalf: jBigInteger = jBigInteger.valueOf(0)
 
   var javaEven1: jBigInteger = jBigInteger.valueOf(0)
   var javaEven2: jBigInteger = jBigInteger.valueOf(0)
 
   var sPrime1: sBigInteger = sBigInteger.valueOf(0)
   var sPrime2: sBigInteger = sBigInteger.valueOf(0)
+  var sPrimeHalf: sBigInteger = sBigInteger.valueOf(0)
 
   var sEven1: sBigInteger = sBigInteger.valueOf(0)
   var sEven2: sBigInteger = sBigInteger.valueOf(0)
 
   var nPrime1: nBigInteger = nBigInteger.valueOf(0)
   var nPrime2: nBigInteger = nBigInteger.valueOf(0)
+  var nPrimeHalf: nBigInteger = nBigInteger.valueOf(0)
 
   var nEven1: nBigInteger = nBigInteger.valueOf(0)
   var nEven2: nBigInteger = nBigInteger.valueOf(0)
 
   var kPrime1: kBigInteger = kBigInteger.valueOf(0)
   var kPrime2: kBigInteger = kBigInteger.valueOf(0)
+  var kPrimeHalf: kBigInteger = kBigInteger.valueOf(0)
 
   var kEven1: kBigInteger = kBigInteger.valueOf(0)
   var kEven2: kBigInteger = kBigInteger.valueOf(0)
@@ -68,5 +72,10 @@ trait BaseBenchmark {
     sEven2 = sPrime2 subtract sONE
     nEven2 = nPrime2 subtract nONE
     kEven2 = kPrime2 subtract kONE
+
+    javaPrimeHalf = javaPrime1 shiftRight(bits / 2)
+    sPrimeHalf = sPrime1 shiftRight(bits / 2)
+    nPrimeHalf = nPrime1 shiftRight(bits / 2)
+    kPrimeHalf = kPrime1 shiftRight(bits / 2)
   }
 }

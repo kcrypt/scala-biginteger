@@ -65,6 +65,10 @@ private[math] object Division {
 
   final val UINT_MAX = 0xffffffffL
 
+  final val whenBurnikelZiegler = 80
+
+  final val whenBurnikelZieglerDifferent = whenBurnikelZiegler / 2
+
   /** Divides an array by another array.
    *
    *  Divides the array 'a' by the array 'b' and gets the quotient and the
@@ -1097,5 +1101,114 @@ private[math] object Division {
       }
     }
     result
+  }
+
+  // algorithm 3 from pg. 9 of the Burnikel-Ziegler paper
+  def divideAndRemainderBurnikelZieglerPositive(aSrc: BigInteger, bSrc: BigInteger): QuotAndRem = {
+    val r: Int = aSrc.numberLength
+    val s: Int = bSrc.numberLength
+
+    if (r < s) {
+      return new QuotAndRem(BigInteger.ZERO, aSrc)
+    }
+
+    val m: Int = 1 << (32 - Integer.numberOfLeadingZeros(s / whenBurnikelZiegler))
+
+    val j: Int = (s + m - 1) / m
+    val n: Int = j * m
+    val n32: Long = n.toLong << 5
+    val sigma: Int = math.max(0, n32 - bSrc.bitLength).toInt
+    val a = aSrc.shiftLeft(sigma)
+    val b = bSrc.shiftLeft(sigma)
+
+    var t: Int = ((a.bitLength + n32) / n32).toInt
+    if (t < 2) {
+      t = 2
+    }
+
+    val a1 = a.getBlock(t - 1, t, n)
+    val a2 = a.getBlock(t - 2, t, n)
+
+    var z = a1.shiftLeft(n32.toInt) add a2 // Z[t-2]
+
+    var quotient = BigInteger.ZERO
+    var c: QuotAndRem = null
+    var i = t - 2
+    while (i > 0) {
+      c = divide2n1n(z, b)
+      z = a.getBlock(i - 1, t, n)
+      z = z add c.rem.shiftLeft(n32.toInt)
+      quotient = (quotient add c.quot).shiftLeft(n32.toInt)
+      i -= 1
+    }
+
+    c = divide2n1n(z, b)
+    quotient = quotient add c.quot
+
+    val remainder = c.rem.shiftRight(sigma)
+    new QuotAndRem(quotient, remainder)
+  }
+
+  // algorithm 1 from pg. 4 of the Burnikel-Ziegler paper
+  def divide2n1n(a: BigInteger, b: BigInteger): QuotAndRem = {
+    if (a.sign == 0) {
+      return QuotAndRem.ZERO_ZERO
+    }
+
+    val n = b.numberLength
+    val n16 = n << 4 // n / 2 in bits
+
+    if (n % 2 != 0 || n < whenBurnikelZiegler) {
+      return a.divideAndRemainderImpl(b)
+    }
+
+    val c1 = divide3n2n(a.shiftRight(n16), b)
+
+    val a4 = a.getLower(n16)
+    val r = c1.rem.shiftLeft(n16) add a4
+    val c2 = divide3n2n(r, b)
+
+    new QuotAndRem(c1.quot.shiftLeft(n16) add c2.quot, c2.rem)
+  }
+
+  // algorithm 2 from pg. 5 of the Burnikel-Ziegler paper
+  def divide3n2n(a: BigInteger, b: BigInteger): QuotAndRem = {
+    val n = b.numberLength / 2
+    val n32 = n << 5
+
+    val a1 = a.shiftRight(n32 << 1)
+    val a2 = a.shiftRight(n32).getLower(n32)
+    val a3 = a.getLower(n32)
+    val a12 = a1.shiftLeft(n32) add a2
+
+    val b1 = b.shiftRight(n32)
+    val b2 = b.getLower(n32)
+
+    var q: BigInteger = null
+    var r1: BigInteger = null
+    if (a1.compareTo(b1) < 0) {
+      val qr = divide2n1n(a12, b1)
+      q = qr.quot
+      r1 = qr.rem
+    } else {
+      q = ones(n)
+      r1 = a12 subtract b1.shiftLeft(n32) add b1
+    }
+
+    val d = q multiply b2
+    var r = r1.shiftLeft(n32) add a3 subtract d //paper says a4
+
+    while (r.sign < 0) {
+      r = r add b
+      q = q subtract BigInteger.ONE
+    }
+
+    new QuotAndRem(q, r)
+  }
+
+  private def ones(n: Int): BigInteger = {
+    val mag: Array[Int] = new Array[Int](n)
+    Arrays.fill(mag, -1);
+    new BigInteger(1, n, mag);
   }
 }

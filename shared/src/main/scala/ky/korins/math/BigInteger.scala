@@ -43,6 +43,7 @@ package ky.korins.math
 
 import scala.annotation.tailrec
 
+import java.util.Arrays
 import java.util.Random
 
 object BigInteger {
@@ -127,6 +128,10 @@ object BigInteger {
   @inline
   private[math] final class QuotAndRem(val quot: BigInteger, val rem: BigInteger) {
     def toArray(): Array[BigInteger] = Array[BigInteger](quot, rem)
+  }
+
+  private[math] object QuotAndRem {
+    val ZERO_ZERO = new QuotAndRem(BigInteger.ZERO, BigInteger.ZERO)
   }
 }
 
@@ -344,62 +349,89 @@ class BigInteger extends Number with Comparable[BigInteger] {
   }
 
   def divide(divisor: BigInteger): BigInteger = {
-    if (divisor.sign == 0)
+    // simple cases
+    if (divisor.sign == 0) {
       throw new ArithmeticException("BigInteger divide by zero")
+    }
 
-    val divisorSign = divisor.sign
     if (divisor.isOne) {
-      if (divisor.sign > 0) this
-      else this.negate()
-    } else {
-      val thisSign = sign
-      val thisLen = numberLength
-      val divisorLen = divisor.numberLength
-      if (thisLen + divisorLen == 2) {
-        var bi = (digits(0) & 0xFFFFFFFFL) / (divisor.digits(0) & 0xFFFFFFFFL)
-        if (thisSign != divisorSign)
-          bi = -bi
-        valueOf(bi)
-      } else {
-        val cmp = {
-          if (thisLen != divisorLen) {
-            if (thisLen > divisorLen) 1
-            else -1
-          } else {
-            Elementary.compareArrays(digits, divisor.digits, thisLen)
-          }
-        }
+      if (divisor.sign > 0)
+        return this
+      else
+        return this.negate()
+    }
 
-        if (cmp == EQUALS) {
-          if (thisSign == divisorSign) ONE
-          else MINUS_ONE
-        } else if (cmp == LESS) {
-          ZERO
+    if (divisor.numberLength >= Division.whenBurnikelZiegler &&
+      numberLength - divisor.numberLength >= Division.whenBurnikelZieglerDifferent) {
+      return divideBurnikelZiegler(divisor)
+    }
+
+    divideKnuth(divisor)
+  }
+
+  private[math] def divideKnuth(divisor: BigInteger): BigInteger = {
+    val divisorSign = divisor.sign
+    val thisSign = sign
+    val thisLen = numberLength
+    val divisorLen = divisor.numberLength
+    if (thisLen + divisorLen == 2) {
+      var bi = (digits(0) & 0xFFFFFFFFL) / (divisor.digits(0) & 0xFFFFFFFFL)
+      if (thisSign != divisorSign)
+        bi = -bi
+      valueOf(bi)
+    } else {
+      val cmp = {
+        if (thisLen != divisorLen) {
+          if (thisLen > divisorLen) 1
+          else -1
         } else {
-          val resLength = thisLen - divisorLen + 1
-          val resDigits = new Array[Int](resLength)
-          val resSign = if (thisSign == divisorSign) 1 else -1
-          if (divisorLen == 1) {
-            Division.divideArrayByInt(resDigits, digits, thisLen, divisor.digits(0))
-          } else {
-            Division.divide(resDigits, resLength, digits, thisLen, divisor.digits, divisorLen)
-          }
-          val result = new BigInteger(resSign, resLength, resDigits)
-          result.cutOffLeadingZeroes()
-          result
+          Elementary.compareArrays(digits, divisor.digits, thisLen)
         }
+      }
+
+      if (cmp == EQUALS) {
+        if (thisSign == divisorSign) ONE
+        else MINUS_ONE
+      } else if (cmp == LESS) {
+        ZERO
+      } else {
+        val resLength = thisLen - divisorLen + 1
+        val resDigits = new Array[Int](resLength)
+        val resSign = if (thisSign == divisorSign) 1 else -1
+        if (divisorLen == 1) {
+          Division.divideArrayByInt(resDigits, digits, thisLen, divisor.digits(0))
+        } else {
+          Division.divide(resDigits, resLength, digits, thisLen, divisor.digits, divisorLen)
+        }
+        val result = new BigInteger(resSign, resLength, resDigits)
+        result.cutOffLeadingZeroes()
+        result
       }
     }
   }
 
-  def divideAndRemainder(divisor: BigInteger): Array[BigInteger] =
-    divideAndRemainderImpl(divisor).toArray()
+  private[math] def divideBurnikelZiegler(divisor: BigInteger): BigInteger =
+    divideAndRemainderBurnikelZiegler(divisor).quot
 
+  def divideAndRemainder(divisor: BigInteger): Array[BigInteger] = {
+    divideAndRemainderImpl(divisor).toArray()
+  }
+
+  @inline
   private[math] def divideAndRemainderImpl(divisor: BigInteger): QuotAndRem = {
-    val divisorSign = divisor.sign
-    if (divisorSign == 0)
+    if (divisor.sign == 0)
       throw new ArithmeticException("BigInteger divide by zero")
 
+    if (divisor.numberLength >= Division.whenBurnikelZiegler &&
+      numberLength - divisor.numberLength >= Division.whenBurnikelZieglerDifferent) {
+      return divideAndRemainderBurnikelZiegler(divisor)
+    }
+
+    divideAndRemainderKnuth(divisor)
+  }
+
+  private[math] def divideAndRemainderKnuth(divisor: BigInteger): QuotAndRem = {
+    val divisorSign = divisor.sign
     val divisorLen = divisor.numberLength
     val divisorDigits = divisor.digits
     if (divisorLen == 1) {
@@ -434,6 +466,39 @@ class BigInteger extends Number with Comparable[BigInteger] {
         new QuotAndRem(result0, result1)
       }
     }
+  }
+
+  private[math] def divideAndRemainderBurnikelZiegler(divisor: BigInteger): QuotAndRem = {
+    val r = Division.divideAndRemainderBurnikelZieglerPositive(abs(), divisor.abs())
+
+    val quot =
+      if (sign * divisor.sign >= 0) r.quot
+      else r.quot.negate()
+
+    val rem =
+      if (signum >= 0) r.rem
+      else r.rem.negate()
+
+    new QuotAndRem(quot, rem)
+  }
+
+  private[math] def getBlock(index: Int, numBlocks: Int, blockLength: Int): BigInteger = {
+    val blockStart = index * blockLength
+
+    var blockEnd = 0
+    if (index == numBlocks - 1) {
+      blockEnd = numberLength
+    } else {
+      blockEnd = (index + 1) * blockLength
+    }
+
+    if (blockStart >= numberLength || blockEnd > numberLength) {
+      return new BigInteger()
+    }
+
+    val newDigits = new Array[Int](blockEnd - blockStart)
+    System.arraycopy(digits, blockStart, newDigits, 0, newDigits.length)
+    new BigInteger(sign, newDigits.length, newDigits)
   }
 
   override def doubleValue(): Double =
@@ -616,36 +681,49 @@ class BigInteger extends Number with Comparable[BigInteger] {
     }
 
   def remainder(divisor: BigInteger): BigInteger = {
-    if (divisor.sign == 0)
+    if (divisor.sign == 0) {
       throw new ArithmeticException("BigInteger divide by zero")
+    }
 
+    if (numberLength < divisor.numberLength) {
+      return this
+    }
+
+    if (divisor.numberLength >= Division.whenBurnikelZiegler &&
+      numberLength - divisor.numberLength >= Division.whenBurnikelZieglerDifferent) {
+      return remainderBurnikelZiegler(divisor)
+    }
+
+    remainderKnuth(divisor)
+  }
+
+  private[math] def remainderKnuth(divisor: BigInteger): BigInteger = {
     val thisLen = numberLength
     val divisorLen = divisor.numberLength
-    val cmp = {
-      if (thisLen != divisorLen) {
-        if (thisLen > divisorLen) 1
-        else -1
-      } else {
-        Elementary.compareArrays(digits, divisor.digits, thisLen)
-      }
-    }
+
+    val cmp =
+      if (thisLen == divisorLen) Elementary.compareArrays(digits, divisor.digits, thisLen)
+      else thisLen.compareTo(divisorLen)
 
     if (cmp == LESS) {
-      this
-    } else {
-      val resLength = divisorLen
-      var resDigits = new Array[Int](resLength)
-      if (resLength == 1) {
-        resDigits(0) = Division.remainderArrayByInt(digits, thisLen, divisor.digits(0))
-      } else {
-        val qLen = thisLen - divisorLen + 1
-        resDigits = Division.divide(null, qLen, digits, thisLen, divisor.digits, divisorLen)
-      }
-      val result = new BigInteger(sign, resLength, resDigits)
-      result.cutOffLeadingZeroes()
-      result
+      return this
     }
+
+    val resLength = divisorLen
+    var resDigits = new Array[Int](resLength)
+    if (resLength == 1) {
+      resDigits(0) = Division.remainderArrayByInt(digits, thisLen, divisor.digits(0))
+    } else {
+      val qLen = thisLen - divisorLen + 1
+      resDigits = Division.divide(null, qLen, digits, thisLen, divisor.digits, divisorLen)
+    }
+    val result = new BigInteger(sign, resLength, resDigits)
+    result.cutOffLeadingZeroes()
+    result
   }
+
+  private[math] def remainderBurnikelZiegler(divisor: BigInteger): BigInteger =
+    divideAndRemainderBurnikelZiegler(divisor).rem
 
   def setBit(n: Int): BigInteger = {
     if (testBit(n)) this
@@ -664,6 +742,18 @@ class BigInteger extends Number with Comparable[BigInteger] {
     else BitLevel.shiftLeft(this, -n)
   }
 
+  private[math] def getLower(n: Int): BigInteger = {
+    val intCount: Int = n >> 5
+    if (intCount == 0 || sign == 0) ZERO
+    else if (numberLength < intCount) this
+    else {
+      val copyDigits = new Array[Int](intCount)
+      System.arraycopy(digits, 0, copyDigits, 0, intCount)
+      val res = new BigInteger(1, intCount, copyDigits)
+      res.cutOffLeadingZeroes()
+      res
+    }
+  }
   def signum(): Int = sign
 
   def subtract(bi: BigInteger): BigInteger = Elementary.subtract(this, bi)

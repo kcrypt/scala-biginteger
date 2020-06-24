@@ -13,33 +13,29 @@ class DivRemBenchmark extends BaseBenchmark {
 
   @Benchmark
   def java(): Unit = {
-    javaPrime1 divideAndRemainder  javaTWO
-    javaPrime2 divideAndRemainder javaTWO
-    javaPrime1 divideAndRemainder javaPrime2
+    javaPrime1 divideAndRemainder javaTWO
     javaPrime2 divideAndRemainder javaPrime1
+    javaEven1 divideAndRemainder javaPrimeHalf
   }
 
   @Benchmark
   def scalajs(): Unit = {
     sPrime1 divideAndRemainder sTWO
-    sPrime2 divideAndRemainder sTWO
-    sPrime1 divideAndRemainder sPrime2
     sPrime2 divideAndRemainder sPrime1
+    sEven1 divideAndRemainder sPrimeHalf
   }
 
   @Benchmark
-  def java_native(): Unit = {
+  def n_native(): Unit = {
     nPrime1 divideAndRemainder nTWO
-    nPrime2 divideAndRemainder nTWO
-    nPrime1 divideAndRemainder nPrime2
     nPrime2 divideAndRemainder nPrime1
+    nEven1 divideAndRemainder nPrimeHalf
   }
 
   @Benchmark
   def korinsky(): Unit = {
     kPrime1 divideAndRemainder kTWO
-    kPrime2 divideAndRemainder kTWO
-    kPrime1 divideAndRemainder kPrime2
     kPrime2 divideAndRemainder kPrime1
+    kEven1 divideAndRemainder kPrimeHalf
   }
 }
