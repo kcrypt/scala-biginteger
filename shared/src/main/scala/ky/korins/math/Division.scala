@@ -113,7 +113,7 @@ private[math] object Division {
           ((normA(j) & UINT_MAX) << 32) + (normA(j - 1) & UINT_MAX)
         val firstDivisorDigitLong = firstDivisorDigit & UINT_MAX
         val quotient =
-          Long.divideUnsigned(product, firstDivisorDigitLong)
+          java.lang.Long.divideUnsigned(product, firstDivisorDigitLong)
         guessDigit = quotient.toInt
         var rem = (product - quotient * firstDivisorDigitLong).toInt
 
@@ -234,7 +234,7 @@ private[math] object Division {
     var i = srcLength - 1
     while (i >= 0) {
       val temp: Long = (rem.toLong << 32) | (src(i) & UINT_MAX)
-      val quot = Long.divideUnsigned(temp, bLong)
+      val quot = java.lang.Long.divideUnsigned(temp, bLong)
       rem = (temp - quot * bLong).toInt
       dest(i) = quot.toInt
       i -= 1
@@ -940,7 +940,7 @@ private[math] object Division {
     var i = srcLength - 1
     while (i >= 0) {
       val temp = (result.toLong << 32) | (src(i).toLong & UINT_MAX)
-      result = Long.remainderUnsigned(temp, longDivisor).toInt
+      result = java.lang.Long.remainderUnsigned(temp, longDivisor).toInt
       i -= 1
     }
     result
