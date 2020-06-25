@@ -50,9 +50,27 @@ object BigInteger {
 
   final val ONE = new BigInteger(1, 1)
 
+  final val TWO = new BigInteger(1, 2)
+
+  final val THREE = new BigInteger(1, 3)
+
+  final val FOUR = new BigInteger(1, 4)
+
+  final val FIVE = new BigInteger(1, 5)
+
+  final val SIX = new BigInteger(1, 6)
+
+  final val SEVEN = new BigInteger(1, 7)
+
+  final val EIGHT = new BigInteger(1, 8)
+
+  final val NINE = new BigInteger(1, 9)
+
   final val TEN = new BigInteger(1, 10)
 
   final val ZERO = new BigInteger(0, 0)
+
+  private[math] final val CERTAINTY = 100
 
   private[math] final val EQUALS = 0
 
@@ -86,7 +104,7 @@ object BigInteger {
   private final val firstNonzeroDigitNotSet = -2
 
   def probablePrime(bitLength: Int, rnd: Random): BigInteger =
-    new BigInteger(bitLength, 100, rnd)
+    new BigInteger(bitLength, CERTAINTY, rnd)
 
   def valueOf(lVal: Long): BigInteger = {
     if (lVal < 0) {
@@ -655,7 +673,7 @@ class BigInteger extends Number with Comparable[BigInteger] {
     if (sign < 0)
       throw new ArithmeticException("start < 0: " + this)
 
-    Primality.nextProbablePrime(this)
+    Primality.nextProbablePrime(this, CERTAINTY)
   }
 
   def not(): BigInteger = Logical.not(this)

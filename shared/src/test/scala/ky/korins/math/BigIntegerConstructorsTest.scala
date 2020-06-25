@@ -154,6 +154,13 @@ class BigIntegerConstructorsTest extends wordspec.AnyWordSpec {
     assert(num == 2 || num == 3)
   }
 
+  "ConstructorBigPrime" in {
+    val bitLen = 250
+    val rnd = new Random()
+    val aNumber = new BigInteger(bitLen, 80, rnd)
+    assert(bitLen == aNumber.bitLength())
+  }
+
   "ConstructorRandom" in {
     val bitLen = 75
     val rnd: Random = new Random()

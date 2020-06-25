@@ -46,12 +46,6 @@ import java.util.Random
 
 /** Provides primality probabilistic methods. */
 private[math] object Primality {
-  private val Bits = Array(
-      0, 0, 1854, 1233, 927, 747, 627, 543, 480, 431, 393, 361, 335, 314, 295,
-      279, 265, 253, 242, 232, 223, 216, 181, 169, 158, 150, 145, 140, 136,
-      132, 127, 123, 119, 114, 110, 105, 101, 96, 92, 87, 83, 78, 73, 69, 64,
-      59, 54, 49, 44, 38, 32, 26, 1)
-
   /** All prime numbers with bit length lesser than 10 bits. */
   private val Primes = Array(2, 3, 5, 7, 11, 13, 17, 19, 23, 29,
       31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97, 101,
@@ -99,7 +93,7 @@ private[math] object Primality {
       do {
         p = new BigInteger(bitLength, rnd)
         if (!p.isProbablePrime(certainty))
-          p = nextProbablePrime(p)
+          p = nextProbablePrime(p, certainty)
       } while (p.bitLength() != bitLength)
       p
     }
@@ -132,14 +126,33 @@ private[math] object Primality {
         i += 1
       }
 
-      // To set the number of iterations necessary for Miller-Rabin test
-      val bitLength = n.bitLength()
-      i = 2
-      while (bitLength < Bits(i)) {
-        i += 1
+      /*
+      ANSI X9.80 specifies the checking that make up a round of the following 3 probabilistic algorithms:
+        1. Miller-Rabin (MR)
+        2. Lucas - Lehmer
+        3. Frobenius-Grantham (FG).
+      And then defines the following 3 methods as conforming to X9.80:
+        1. 50 MR rounds.
+        2. a lesser number of MR rounds based on size (between 2 and 27) followed by 1 Lucas round.
+        3. a specific number of FG rounds based on size (between 2 and 8).
+
+      This allows to reduce number of MR rounds significant
+      */
+      if (n.bitLength() < 100) {
+        return millerRabin(n, 50) // fast, very-very-fast only MR
       }
-      val newCertainty = Math.min(i, 1 + ((certainty - 1) >> 1))
-      millerRabin(n, newCertainty)
+
+      val bitLength = n.bitLength()
+      val x980_rounds =
+        if (bitLength < 256) 27
+        else if (bitLength < 512) 15
+        else if (bitLength < 768) 8
+        else if (bitLength < 1024) 4
+        else 2
+
+      val newCertainty = Math.min(x980_rounds, 1 + ((certainty - 1) >> 1))
+
+      millerRabin(n, newCertainty) && lucasLehmer(n)
     }
     // scalastyle:on return
   }
@@ -154,7 +167,7 @@ private[math] object Primality {
    *  @see BigInteger#nextProbablePrime()
    *  @see #millerRabin(BigInteger, int)
    */
-  def nextProbablePrime(n: BigInteger): BigInteger = {
+  def nextProbablePrime(n: BigInteger, certainty: Int): BigInteger = {
     // scalastyle:off return
     // PRE: n >= 0
     val gapSize = 1024 // for searching of the next probable prime number
@@ -182,13 +195,6 @@ private[math] object Primality {
     // To fix N to the "next odd number"
     if (n.testBit(0)) Elementary.inplaceAdd(startPoint, 2)
     else startPoint.digits(0) |= 1
-
-    // To set the improved certainty of Miller-Rabin
-    var certainty = 2
-    val shift = Bits(certainty) - startPoint.bitLength()
-    if (shift > 0) {
-      certainty += shift
-    }
 
     // To calculate modules: N mod p1, N mod p2, ... for first primes.
     var i = 0
@@ -219,7 +225,7 @@ private[math] object Primality {
       while (j < gapSize) {
         if (!isDivisible(j)) {
           Elementary.inplaceAdd(probPrime, j)
-          if (millerRabin(probPrime, certainty)) {
+          if (isProbablePrime(probPrime, certainty)) {
             return probPrime
           }
         }
@@ -284,5 +290,81 @@ private[math] object Primality {
     }
     true
     // scalastyle:on return
+  }
+
+  // Compute the jacobi symbol (a/n), as described at
+  // Digital signature standard (DSS). FIPS PUB 186-4, National Institute of Standards and Technology (NIST), 2013.
+  // pages 76-77
+  def jacobi(inint_a: BigInteger, inint_n: BigInteger): Int = {
+    var a = inint_a
+    var n = inint_n
+    var s = 1
+
+    a = a mod n
+    while (!(a equals BigInteger.ONE) && !(n equals BigInteger.ONE) && !(a equals BigInteger.ZERO)) {
+      a = a mod n
+      var e = 0
+      var a1 = a
+
+      while ((a1 and BigInteger.ONE) equals BigInteger.ZERO) {
+        e += 1
+        a1 = a1 shiftRight 1
+      }
+
+      s *= ((if ((e & 0x1) == 0) 1 else {
+        val `n mod 8` = n mod BigInteger.EIGHT
+        if ((`n mod 8` equals BigInteger.ONE) || (`n mod 8` equals BigInteger.SEVEN)) 1
+        else -1
+      }) * (if (((n mod BigInteger.FOUR) equals BigInteger.THREE) && ((a1 mod BigInteger.FOUR) equals BigInteger.THREE)) -1 else 1))
+
+      a = n
+      n = a1
+    }
+    if (!(a equals BigInteger.ZERO)) s else 0
+  }
+
+  /* Lucas-Lehmer probable prime. */
+  private def lucasLehmer(n: BigInteger): Boolean = {
+    var d = BigInteger.FIVE
+    while (jacobi(d, n) != -1) {
+      d = if (d.sign < 0) d.abs() add BigInteger.TWO
+      else (d add BigInteger.TWO).negate()
+    }
+
+    val k = n add BigInteger.ONE
+    var u = BigInteger.ONE
+    var v = BigInteger.ONE
+
+    // for (int i=k.bitLength()-2; i >= 0; i--) {
+    var i = k.bitLength() - 2
+    while (i >= 0) {
+      var u2 = u multiply v mod n
+      var v2 = v.pow(2) add (d multiply u.pow(2)) mod n
+      if (v2.testBit(0)) {
+        v2 = v2 subtract n
+      }
+      v2 = v2.shiftRight(1)
+      u = u2
+      v = v2
+      if (k.testBit(i)) {
+        u2 = u add(v) mod n
+        if (u2.testBit(0)) {
+          u2 = u2 subtract n
+        }
+
+        u2 = u2.shiftRight(1)
+        v2 = v add(d multiply u) mod n
+        if (v2.testBit(0)) {
+          v2 = v2 subtract n
+        }
+        v2 = v2.shiftRight(1)
+
+        u = u2
+        v = v2
+      }
+      i -= 1
+    }
+
+    (u mod n) equals  BigInteger.ZERO
   }
 }
