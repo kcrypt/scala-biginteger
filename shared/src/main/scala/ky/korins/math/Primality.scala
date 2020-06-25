@@ -203,7 +203,6 @@ private[math] object Primality {
       i += 1
     }
 
-    val probPrime: BigInteger = startPoint.copy()
     while (true) {
       // At this point, all numbers in the gap are initialized as probably primes
       Arrays.fill(isDivisible, false)
@@ -224,7 +223,7 @@ private[math] object Primality {
       var j = 0
       while (j < gapSize) {
         if (!isDivisible(j)) {
-          Elementary.inplaceAdd(probPrime, j)
+          val probPrime: BigInteger = startPoint add BigInteger.valueOf(j)
           if (isProbablePrime(probPrime, certainty)) {
             return probPrime
           }
