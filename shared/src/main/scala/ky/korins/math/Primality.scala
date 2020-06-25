@@ -95,24 +95,13 @@ private[math] object Primality {
       val rp = OffsetPrimes(bitLength)
       BiPrimes(rp._1 + rnd.nextInt(rp._2))
     } else {
-      val shiftCount = (-bitLength) & 31
-      val count = (bitLength + 31) >> 5
-      val n = new BigInteger(1, count, new Array[Int](count))
-
-      val last = count - 1
+      var p: BigInteger = null
       do {
-        // To fill the array with random integers
-        var i = 0
-        while (i < n.numberLength) {
-          n.digits(i) = rnd.nextInt()
-          i += 1
-        }
-        // To fix to the correct bitLength
-        n.digits(last) = (n.digits(last) | 0x80000000) >>> shiftCount
-        // To create an odd number
-        n.digits(0) |= 1
-      } while (!isProbablePrime(n, certainty))
-      n
+        p = new BigInteger(bitLength, rnd)
+        if (!p.isProbablePrime(certainty))
+          p = nextProbablePrime(p)
+      } while (p.bitLength() != bitLength)
+      p
     }
   }
 
