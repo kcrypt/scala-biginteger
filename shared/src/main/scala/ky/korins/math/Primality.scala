@@ -46,6 +46,8 @@ import java.util.Random
 
 /** Provides primality probabilistic methods. */
 private[math] object Primality {
+  val searchLen = 1024 // for searching of the next probable prime number
+
   /** All prime numbers with bit length lesser than 10 bits. */
   private val Primes = Array(2, 3, 5, 7, 11, 13, 17, 19, 23, 29,
       31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97, 101,
@@ -89,13 +91,36 @@ private[math] object Primality {
       val rp = OffsetPrimes(bitLength)
       BiPrimes(rp._1 + rnd.nextInt(rp._2))
     } else {
-      var p: BigInteger = null
+      val shiftCount = (-bitLength) & 31
+      val count = (bitLength + 31) >> 5
+      val n = new BigInteger(1, count, new Array[Int](count))
+
+      val last = count - 1
+      var sieve: Sieve = null
       do {
-        p = new BigInteger(bitLength, rnd)
-        if (!p.isProbablePrime(certainty))
-          p = nextProbablePrime(p, certainty)
-      } while (p.bitLength() != bitLength)
-      p
+        if (n.bitLength() != bitLength) {
+          // To fill the array with random integers
+          var i = 0
+          while (i < n.numberLength) {
+            n.digits(i) = rnd.nextInt()
+            i += 1
+          }
+          // To fix to the correct bitLength
+          n.digits(last) = (n.digits(last) | 0x80000000) >>> shiftCount
+          // To create an odd number
+          n.digits(0) |= 1
+          sieve = new Sieve(n, searchLen)
+        }
+
+        sieve.retrieveNext(n, certainty) match {
+          case None =>
+            Elementary.inplaceAdd(n, searchLen)
+
+          case Some(probPrime) =>
+            return probPrime
+        }
+      } while (true)
+      throw new AssertionError("Primality.consBigInteger: Should not get here")
     }
   }
 
@@ -119,14 +144,20 @@ private[math] object Primality {
       Arrays.binarySearch(Primes, n.digits(0)) >= 0
     } else {
       // To check if 'n' is divisible by some prime of the table
-      var i = 1
+      var i = 0
       while (i < Primes.length) {
         if (Division.remainderArrayByInt(n.digits, n.numberLength, Primes(i)) == 0)
           return false
         i += 1
       }
 
-      /*
+      isProbablePrimeImpl(n, certainty)
+    }
+    // scalastyle:on return
+  }
+
+  def isProbablePrimeImpl(n: BigInteger, certainty: Int): Boolean = {
+    /*
       ANSI X9.80 specifies the checking that make up a round of the following 3 probabilistic algorithms:
         1. Miller-Rabin (MR)
         2. Lucas - Lehmer
@@ -137,24 +168,22 @@ private[math] object Primality {
         3. a specific number of FG rounds based on size (between 2 and 8).
 
       This allows to reduce number of MR rounds significant
-      */
-      if (n.bitLength() < 100) {
-        return millerRabin(n, 50) // fast, very-very-fast only MR
-      }
-
-      val bitLength = n.bitLength()
-      val x980_rounds =
-        if (bitLength < 256) 27
-        else if (bitLength < 512) 15
-        else if (bitLength < 768) 8
-        else if (bitLength < 1024) 4
-        else 2
-
-      val newCertainty = Math.min(x980_rounds, 1 + ((certainty - 1) >> 1))
-
-      millerRabin(n, newCertainty) && lucasLehmer(n)
+     */
+    if (n.bitLength() < 100) {
+      return millerRabin(n, 50) // fast, very-very-fast only MR
     }
-    // scalastyle:on return
+
+    val bitLength = n.bitLength()
+    val x980_rounds =
+      if (bitLength < 256) 27
+      else if (bitLength < 512) 15
+      else if (bitLength < 768) 8
+      else if (bitLength < 1024) 4
+      else 2
+
+    val newCertainty = Math.min(x980_rounds, 1 + ((certainty - 1) >> 1))
+
+    millerRabin(n, newCertainty) && lucasLehmer(n)
   }
 
   /** Returns the next, probable prime number.
@@ -170,9 +199,6 @@ private[math] object Primality {
   def nextProbablePrime(n: BigInteger, certainty: Int): BigInteger = {
     // scalastyle:off return
     // PRE: n >= 0
-    val gapSize = 1024 // for searching of the next probable prime number
-    val modules = new Array[Int](Primes.length)
-    val isDivisible = new Array[Boolean](gapSize)
 
     // If n < "last prime of table" searches next prime in the table
     val digitsLessPrime = (n.digits(0) < Primes(Primes.length - 1))
@@ -196,24 +222,47 @@ private[math] object Primality {
     if (n.testBit(0)) Elementary.inplaceAdd(startPoint, 2)
     else startPoint.digits(0) |= 1
 
-    // To calculate modules: N mod p1, N mod p2, ... for first primes.
-    var i = 0
-    while (i < Primes.length) {
-      modules(i) = Division.remainder(startPoint, Primes(i)) - gapSize
-      i += 1
+    val sieve = new Sieve(startPoint, searchLen)
+    while (true) {
+      sieve.retrieveNext(startPoint, certainty) match {
+        case None =>
+          Elementary.inplaceAdd(startPoint, searchLen)
+        case Some(probPrime) =>
+          return probPrime
+      }
+    }
+    throw new AssertionError("Primality.nextProbablePrime: Should not get here")
+    // scalastyle:on return
+  }
+
+  // Implement sieve of Eratosthenes
+  class Sieve(startPoint: BigInteger, searchLen: Int) {
+    private val modules = {
+      val modules = new Array[Int](Primes.length)
+
+      // To calculate modules: N mod p1, N mod p2, ... for first primes.
+      var i = 0
+      while (i < Primes.length) {
+        modules(i) = Division.remainder(startPoint, Primes(i)) - searchLen
+        i += 1
+      }
+
+      modules
     }
 
-    while (true) {
+    private val isDivisible = new Array[Boolean](searchLen)
+
+    def retrieveNext(from: BigInteger, certainty: Int): Option[BigInteger] = {
       // At this point, all numbers in the gap are initialized as probably primes
       Arrays.fill(isDivisible, false)
       // To discard multiples of first primes
-      i = 0
+      var i = 0
       while (i < Primes.length) {
-        modules(i) = (modules(i) + gapSize) % Primes(i)
+        modules(i) = (modules(i) + searchLen) % Primes(i)
         var j =
           if (modules(i) == 0) 0
           else (Primes(i) - modules(i))
-        while (j < gapSize) {
+        while (j < searchLen) {
           isDivisible(j) = true
           j += Primes(i)
         }
@@ -221,20 +270,25 @@ private[math] object Primality {
       }
       // To execute Miller-Rabin for non-divisible numbers by all first primes
       var j = 0
-      while (j < gapSize) {
+      var skip = 0
+      val probPrime = from.copy()
+      while (j < searchLen) {
         if (!isDivisible(j)) {
-          val probPrime: BigInteger = startPoint add BigInteger.valueOf(j)
-          if (isProbablePrime(probPrime, certainty)) {
-            return probPrime
+          Elementary.inplaceAdd(probPrime, skip)
+          skip = 0
+          if (isProbablePrimeImpl(probPrime, certainty)) {
+            return Some(probPrime)
           }
+        } else {
+          skip += 1
         }
         j += 1
       }
-      Elementary.inplaceAdd(startPoint, gapSize)
+      None
     }
-    throw new AssertionError("Primality.nextProbablePrime: Should not get here")
-    // scalastyle:on return
   }
+
+
 
   /** The Miller-Rabin primality test.
    *
