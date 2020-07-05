@@ -4,7 +4,7 @@ lazy val scala211 = "2.11.12"
 lazy val scala212 = "2.12.11"
 lazy val scala213 = "2.13.2"
 
-lazy val scalatestVersion = "3.1.2"
+lazy val scalatestVersion = "3.2.0"
 
 name := "biginteger"
 organization in ThisBuild := "ky.korins"
@@ -51,8 +51,7 @@ lazy val biginteger = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .nativeSettings(
     scalaVersion := scala211,
     crossScalaVersions := Seq(scala211),
-    nativeLinkStubs := true,
-    Test / test := {}
+    nativeLinkStubs := true
   )
 
 lazy val bench = project.in(file("bench"))
