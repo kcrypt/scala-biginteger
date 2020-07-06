@@ -26,8 +26,8 @@ class BigIntegerDivideTest extends wordspec.AnyWordSpec {
   def compareBZandKnuth(a: BigInteger, b: BigInteger): Unit = {
     val knuth = a divideAndRemainderKnuth b
     val BZ = a divideAndRemainderBurnikelZiegler b
-    assert(knuth.rem == BZ.rem)
-    assert(knuth.quot == BZ.quot)
+    assert(knuth.rem equals BZ.rem)
+    assert(knuth.quot equals BZ.quot)
   }
 
   "Case1" in {

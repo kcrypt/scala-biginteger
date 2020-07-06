@@ -283,7 +283,7 @@ class BigIntegerOrTest extends wordspec.AnyWordSpec {
     val r1 = x.and((BigInteger.ZERO.not()).shiftLeft(32))
     val r3 = x.and((BigInteger.ZERO.not().shiftLeft(32)).not())
     val result = r1.or(r3)
-    assert(x == result)
+    assert(x equals result)
   }
 
   "ZeroNeg" in {

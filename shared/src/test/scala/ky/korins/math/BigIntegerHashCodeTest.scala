@@ -40,7 +40,7 @@ class BigIntegerHashCodeTest extends wordspec.AnyWordSpec {
     val b = 1136802186495971562L
     val c = BigInteger.valueOf(a).add(BigInteger.valueOf(b))
     val d = BigInteger.valueOf(c.longValue())
-    assert(c == d) // sanity
+    assert(c equals d) // sanity
     assert(c.hashCode == d.hashCode)
   }
 

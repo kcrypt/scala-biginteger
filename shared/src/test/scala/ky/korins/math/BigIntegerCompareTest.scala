@@ -189,7 +189,7 @@ class BigIntegerCompareTest extends wordspec.AnyWordSpec {
       val bSign = 1
       val aNumber = new BigInteger(aSign, aBytes)
       val bNumber = new BigInteger(bSign, bBytes)
-      assert(aNumber == bNumber)
+      assert(aNumber equals bNumber)
     }
 
     "EqualsNull" in {

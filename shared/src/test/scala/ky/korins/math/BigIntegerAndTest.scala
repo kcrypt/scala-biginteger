@@ -146,7 +146,7 @@ class BigIntegerAndTest extends wordspec.AnyWordSpec {
     val aNumber = BigInteger.ONE
     val bNumber = BigInteger.ONE
     val result = aNumber.and(bNumber)
-    assert(result == BigInteger.ONE)
+    assert(result equals BigInteger.ONE)
     assert(1 == result.signum())
   }
 
