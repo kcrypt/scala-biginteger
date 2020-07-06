@@ -2,11 +2,21 @@
 
 This is optimized implementation of BigInteger on scala for scala, scala-js and scala-native.
 
-As the base it is used scala-js implementation from https://github.com/scala-js/scala-js/commit/c82fa8c16f14a36f96af8b08313d36a6dd70b2b1
-that was ported from java by Alistair Johnson that is technically GWT/Harmony/IBM JDK implementation.
+As the base it is used scala-js implementation that was ported from java by Alistair Johnson
+ that is technically GWT/Harmony/IBM JDK implementation.
 
-All this optimization mainly focused to less sweepings and highest performance on `multiply`, `mod` and `modPow`.
-As side effect I've optimized `devide`, `reminder` and this sort of things.
+All this optimization mainly focused to less sweepings and highest performance on `mod`, `modPow` and `isProbablePrime`.
+As side effect I've optimized `devide`, `reminder`, `nextProbablePrime` and something near.
+
+Summary of optimizations:
+ - replaced `for` loop to `while`
+ - introduced Burnikel-Ziegler division
+ - switched to sieve of Eratosthenes at construction of `BigInteger`
+ - introduced Lucas-Lehmer probable prime test with following ANSI X9.80 specification
+ - introduced a merged montgomery multiplication and reduction
+
+The key idea of montgomery function is splitting it to `modSquare` and `modProp`
+ where each of them is merged version of multiplication and reduction that used constant sweepings.
 
 For compare performance I've included to benchmarks BigInteger implementation from OpenJDK 14,
 but I haven't used any part of inside the code.
