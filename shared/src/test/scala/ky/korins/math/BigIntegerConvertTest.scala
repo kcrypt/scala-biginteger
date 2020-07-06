@@ -23,6 +23,35 @@ import org.scalatest.wordspec
 
 class BigIntegerConvertTest extends wordspec.AnyWordSpec {
 
+  // Wrappers to overstep https://github.com/scala-native/scala-native/issues/1836
+  private def crashAsDouble(b: BigInteger)(cb: BigInteger => Unit): Unit = {
+    try {
+      cb(b)
+    } catch {
+      case e: NumberFormatException =>
+        try {
+          b.toString().toDouble
+          fail(e)
+        } catch {
+          case de: NumberFormatException if e.getMessage == de.getMessage =>
+        }
+    }
+  }
+
+  private def crashAsFloat(b: BigInteger)(cb: BigInteger => Unit): Unit = {
+    try {
+      cb(b)
+    } catch {
+      case e: NumberFormatException =>
+        try {
+          b.toString().toFloat
+          fail(e)
+        } catch {
+          case de: NumberFormatException if e.getMessage == de.getMessage =>
+        }
+    }
+  }
+
   "DoubleValueNegative1" in {
     val a = "-27467238945"
     val result = -2.7467238945E10
@@ -43,8 +72,10 @@ class BigIntegerConvertTest extends wordspec.AnyWordSpec {
       "2384756345634568456345689345683475863465786485764785684564576348756" +
       "7384567845678658734587364576745683475674576345786348576847567846578" +
       "3456702897830296720476846578634576384567845678346573465786457863"
-    val aNumber = new BigInteger(a).doubleValue()
-    assert(Double.NegativeInfinity == aNumber)
+    crashAsDouble(new BigInteger(a)) { b =>
+      val aNumber = b.doubleValue()
+      assert(Double.NegativeInfinity == aNumber)
+    }
   }
 
   "DoubleValueNegativeInfinity2" in {
@@ -55,8 +86,10 @@ class BigIntegerConvertTest extends wordspec.AnyWordSpec {
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
     val aSign = -1
-    val aNumber = new BigInteger(aSign, a).doubleValue()
-    assert(Double.NegativeInfinity == aNumber)
+    crashAsDouble(new BigInteger(aSign, a)) { b =>
+      val aNumber = b.doubleValue()
+      assert(Double.NegativeInfinity == aNumber)
+    }
   }
 
   "DoubleValueNegMantissaIsZero" in {
@@ -131,8 +164,10 @@ class BigIntegerConvertTest extends wordspec.AnyWordSpec {
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
     val aSign = 1
-    val aNumber = new BigInteger(aSign, a).doubleValue()
-    assert(Double.PositiveInfinity == aNumber)
+    crashAsDouble(new BigInteger(aSign, a)) { b =>
+      val aNumber = b.doubleValue()
+      assert(Double.PositiveInfinity == aNumber)
+    }
   }
 
   "DoubleValuePositiveInfinity2" in {
@@ -141,8 +176,10 @@ class BigIntegerConvertTest extends wordspec.AnyWordSpec {
       "3847563456345684563456893456834758634657864857647856845645763487567" +
       "3845678456786587345873645767456834756745763457863485768475678465783" +
       "456702897830296720476846578634576384567845678346573465786457863"
-    val aNumber = new BigInteger(a).doubleValue()
-    assert(Double.PositiveInfinity == aNumber)
+    crashAsDouble(new BigInteger(a)) { b =>
+      val aNumber = b.doubleValue()
+      assert(Double.PositiveInfinity == aNumber)
+    }
   }
 
   "DoubleValuePosMantissaIsZero" in {
@@ -243,22 +280,28 @@ class BigIntegerConvertTest extends wordspec.AnyWordSpec {
       "2384756345634568456345689345683475863465786485764785684564576348756" +
       "7384567845678658734587364576745683475674576345786348576847567846578" +
       "3456702897830296720476846578634576384567845678346573465786457863"
-    val aNumber = new BigInteger(a).floatValue()
-    assert(Float.NegativeInfinity == aNumber)
+    crashAsFloat(new BigInteger(a)) { b =>
+      val aNumber = b.floatValue()
+      assert(Float.NegativeInfinity == aNumber)
+    }
   }
 
   "FloatValueNegativeInfinity2" in {
     val a = Array[Byte](0, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1)
     val aSign = -1
-    val aNumber = new BigInteger(aSign, a).floatValue()
-    assert(Float.NegativeInfinity == aNumber)
+    crashAsFloat(new BigInteger(aSign, a)) { b =>
+      val aNumber = b.floatValue()
+      assert(Float.NegativeInfinity == aNumber)
+    }
   }
 
   "FloatValueNegMantissaIsZero" in {
     val a = Array[Byte](1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
     val aSign = -1
-    val aNumber = new BigInteger(aSign, a).floatValue()
-    assert(Float.NegativeInfinity == aNumber)
+    crashAsFloat(new BigInteger(aSign, a)) { b =>
+      val aNumber = b.floatValue()
+      assert(Float.NegativeInfinity == aNumber)
+    }
   }
 
   "FloatValueNegNotRounded" in {
@@ -291,15 +334,19 @@ class BigIntegerConvertTest extends wordspec.AnyWordSpec {
   "FloatValuePastNegMaxValue" in {
     val a = Array[Byte](0, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1)
     val aSign = -1
-    val aNumber = new BigInteger(aSign, a).floatValue()
-    assert(Float.NegativeInfinity == aNumber)
+    crashAsFloat(new BigInteger(aSign, a)) { b =>
+      val aNumber = b.floatValue()
+      assert(Float.NegativeInfinity == aNumber)
+    }
   }
 
   "FloatValuePastPosMaxValue" in {
     val a = Array[Byte](0, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1)
     val aSign = 1
-    val aNumber = new BigInteger(aSign, a).floatValue()
-    assert(Float.PositiveInfinity == aNumber)
+    crashAsFloat(new BigInteger(aSign, a)) { b =>
+      val aNumber = b.floatValue()
+      assert(Float.PositiveInfinity == aNumber)
+    }
   }
 
   "FloatValuePositive1" in {
@@ -320,8 +367,10 @@ class BigIntegerConvertTest extends wordspec.AnyWordSpec {
   "FloatValuePositiveInfinity1" in {
     val a = Array[Byte](0, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1)
     val aSign = 1
-    val aNumber: Float = new BigInteger(aSign, a).floatValue()
-    assert(Float.PositiveInfinity == aNumber)
+    crashAsFloat(new BigInteger(aSign, a)) { b =>
+      val aNumber: Float = b.floatValue()
+      assert(Float.PositiveInfinity == aNumber)
+    }
   }
 
   "FloatValuePositiveInfinity2" in {
@@ -330,8 +379,10 @@ class BigIntegerConvertTest extends wordspec.AnyWordSpec {
       "75634563456845634568934568347586346578648576478568456457634875673845" +
       "67845678658734587364576745683475674576345786348576847567846578345670" +
       "2897830296720476846578634576384567845678346573465786457863"
-    val aNumber = new BigInteger(a).floatValue()
-    assert(Float.PositiveInfinity == aNumber)
+    crashAsFloat(new BigInteger(a)) { b =>
+      val aNumber = b.floatValue()
+      assert(Float.PositiveInfinity == aNumber)
+    }
   }
 
   "FloatValuePosMantissaIsZero" in {
