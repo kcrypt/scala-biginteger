@@ -13,29 +13,30 @@ class DivRemBenchmark extends BaseBenchmark {
 
   @Benchmark
   def java(): Unit = {
-    javaPrime1 divideAndRemainder javaTWO
-    javaPrime2 divideAndRemainder javaPrime1
-    javaEven1 divideAndRemainder javaPrimeHalf
+    javaHuge divideAndRemainder javaPrimeHalf
   }
 
   @Benchmark
   def scalajs(): Unit = {
-    sPrime1 divideAndRemainder sTWO
-    sPrime2 divideAndRemainder sPrime1
-    sEven1 divideAndRemainder sPrimeHalf
+    sHuge divideAndRemainder sPrimeHalf
   }
 
   @Benchmark
   def n_native(): Unit = {
-    nPrime1 divideAndRemainder nTWO
-    nPrime2 divideAndRemainder nPrime1
-    nEven1 divideAndRemainder nPrimeHalf
+    nHuge divideAndRemainder nPrimeHalf
   }
 
   @Benchmark
   def korinsky(): Unit = {
-    kPrime1 divideAndRemainder kTWO
-    kPrime2 divideAndRemainder kPrime1
-    kEven1 divideAndRemainder kPrimeHalf
+    kHuge divideAndRemainder kPrimeHalf
+  }
+}
+
+object DivRemBenchmark extends App {
+  val benchmark = new DivRemBenchmark()
+  benchmark.bits = 8192
+  benchmark.setup()
+  while (true) {
+    benchmark.korinsky()
   }
 }

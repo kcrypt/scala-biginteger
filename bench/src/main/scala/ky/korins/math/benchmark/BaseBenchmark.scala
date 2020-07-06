@@ -27,6 +27,7 @@ trait BaseBenchmark {
   var javaPrime1: jBigInteger = jBigInteger.valueOf(0)
   var javaPrime2: jBigInteger = jBigInteger.valueOf(0)
   var javaPrimeHalf: jBigInteger = jBigInteger.valueOf(0)
+  var javaHuge: jBigInteger = jBigInteger.valueOf(0)
 
   var javaEven1: jBigInteger = jBigInteger.valueOf(0)
   var javaEven2: jBigInteger = jBigInteger.valueOf(0)
@@ -34,6 +35,7 @@ trait BaseBenchmark {
   var sPrime1: sBigInteger = sBigInteger.valueOf(0)
   var sPrime2: sBigInteger = sBigInteger.valueOf(0)
   var sPrimeHalf: sBigInteger = sBigInteger.valueOf(0)
+  var sHuge: sBigInteger = sBigInteger.valueOf(0)
 
   var sEven1: sBigInteger = sBigInteger.valueOf(0)
   var sEven2: sBigInteger = sBigInteger.valueOf(0)
@@ -41,6 +43,7 @@ trait BaseBenchmark {
   var nPrime1: nBigInteger = nBigInteger.valueOf(0)
   var nPrime2: nBigInteger = nBigInteger.valueOf(0)
   var nPrimeHalf: nBigInteger = nBigInteger.valueOf(0)
+  var nHuge: nBigInteger = nBigInteger.valueOf(0)
 
   var nEven1: nBigInteger = nBigInteger.valueOf(0)
   var nEven2: nBigInteger = nBigInteger.valueOf(0)
@@ -48,6 +51,7 @@ trait BaseBenchmark {
   var kPrime1: kBigInteger = kBigInteger.valueOf(0)
   var kPrime2: kBigInteger = kBigInteger.valueOf(0)
   var kPrimeHalf: kBigInteger = kBigInteger.valueOf(0)
+  var kHuge: kBigInteger = kBigInteger.valueOf(0)
 
   var kEven1: kBigInteger = kBigInteger.valueOf(0)
   var kEven2: kBigInteger = kBigInteger.valueOf(0)
@@ -77,5 +81,10 @@ trait BaseBenchmark {
     sPrimeHalf = sPrime1 shiftRight(bits / 2)
     nPrimeHalf = nPrime1 shiftRight(bits / 2)
     kPrimeHalf = kPrime1 shiftRight(bits / 2)
+
+    javaHuge = javaPrime1 multiply javaPrime2
+    sHuge = sPrime1 multiply sPrime2
+    nHuge = nPrime1 multiply nPrime2
+    kHuge = kPrime1 multiply kPrime2
   }
 }
