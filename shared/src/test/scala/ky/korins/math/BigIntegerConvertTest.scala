@@ -247,14 +247,14 @@ class BigIntegerConvertTest extends wordspec.AnyWordSpec {
     assert(Float.NegativeInfinity == aNumber)
   }
 
-  "FloatValueNegativeInfinity2" ignore {
+  "FloatValueNegativeInfinity2" in {
     val a = Array[Byte](0, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1)
     val aSign = -1
     val aNumber = new BigInteger(aSign, a).floatValue()
     assert(Float.NegativeInfinity == aNumber)
   }
 
-  "FloatValueNegMantissaIsZero" ignore {
+  "FloatValueNegMantissaIsZero" in {
     val a = Array[Byte](1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
     val aSign = -1
     val aNumber = new BigInteger(aSign, a).floatValue()
@@ -288,14 +288,14 @@ class BigIntegerConvertTest extends wordspec.AnyWordSpec {
     assert(aNumber - result < delta)
   }
 
-  "FloatValuePastNegMaxValue" ignore {
+  "FloatValuePastNegMaxValue" in {
     val a = Array[Byte](0, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1)
     val aSign = -1
     val aNumber = new BigInteger(aSign, a).floatValue()
     assert(Float.NegativeInfinity == aNumber)
   }
 
-  "FloatValuePastPosMaxValue" ignore {
+  "FloatValuePastPosMaxValue" in {
     val a = Array[Byte](0, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1)
     val aSign = 1
     val aNumber = new BigInteger(aSign, a).floatValue()
@@ -317,7 +317,7 @@ class BigIntegerConvertTest extends wordspec.AnyWordSpec {
     assert(aNumber - result < delta)
   }
 
-  "FloatValuePositiveInfinity1" ignore {
+  "FloatValuePositiveInfinity1" in {
     val a = Array[Byte](0, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1)
     val aSign = 1
     val aNumber: Float = new BigInteger(aSign, a).floatValue()
