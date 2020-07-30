@@ -18,6 +18,10 @@ Summary of optimizations:
 The key idea of montgomery function is splitting it to `modSquare` and `modProp`
  where each of them is merged version of multiplication and reduction that used constant sweepings.
 
+This fork also fixed bugs:
+ - prevented incorrect hashcode in highly concurrent environment
+ - reset hashcode after `uncache()`
+
 For compare performance I've included to benchmarks BigInteger implementation from OpenJDK 14,
 but I haven't used any part of inside the code.
 
