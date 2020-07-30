@@ -318,17 +318,17 @@ class BigIntegerMultiplyTest extends wordspec.AnyWordSpec {
   }
 
   "Pow31_issue_2045" in {
-    assert(new BigInteger("2147483648") == BigInteger.valueOf(2).pow(31))
-    assert(new BigInteger("1326443518324400147398656") == BigInteger.valueOf(6).pow(31))
-    assert(new BigInteger("10000000000000000000000000000000") == BigInteger.valueOf(10).pow(31))
-    assert(new BigInteger("338820052976784335907174521413566464") == BigInteger.valueOf(14).pow(31))
-    assert(new BigInteger("819308872942260126404286866009182175232") == BigInteger.valueOf(18).pow(31))
-    assert(new BigInteger("412195366437884247746798137865015318806528") == BigInteger.valueOf(22).pow(31))
-    assert(new BigInteger("73143171433403393900724146770015259539275776") == BigInteger.valueOf(26).pow(31))
-    assert(new BigInteger("6176733962839470000000000000000000000000000000") == BigInteger.valueOf(30).pow(31))
-    assert(new BigInteger("299120672332806228664106719451209941853702979584") == BigInteger.valueOf(34).pow(31))
-    assert(new BigInteger("9403542573537726518107430106299028013391242330112") == BigInteger.valueOf(38).pow(31))
-    assert(new BigInteger("209280132851277227501988209234026802122409700753408") == BigInteger.valueOf(42).pow(31))
-    assert(new BigInteger("3511500884366740741319133039278240178576180323024896") == BigInteger.valueOf(46).pow(31))
+    assert(new BigInteger("2147483648") equals BigInteger.valueOf(2).pow(31))
+    assert(new BigInteger("1326443518324400147398656") equals BigInteger.valueOf(6).pow(31))
+    assert(new BigInteger("10000000000000000000000000000000") equals BigInteger.valueOf(10).pow(31))
+    assert(new BigInteger("338820052976784335907174521413566464") equals BigInteger.valueOf(14).pow(31))
+    assert(new BigInteger("819308872942260126404286866009182175232") equals BigInteger.valueOf(18).pow(31))
+    assert(new BigInteger("412195366437884247746798137865015318806528") equals BigInteger.valueOf(22).pow(31))
+    assert(new BigInteger("73143171433403393900724146770015259539275776") equals BigInteger.valueOf(26).pow(31))
+    assert(new BigInteger("6176733962839470000000000000000000000000000000") equals BigInteger.valueOf(30).pow(31))
+    assert(new BigInteger("299120672332806228664106719451209941853702979584") equals BigInteger.valueOf(34).pow(31))
+    assert(new BigInteger("9403542573537726518107430106299028013391242330112") equals BigInteger.valueOf(38).pow(31))
+    assert(new BigInteger("209280132851277227501988209234026802122409700753408") equals BigInteger.valueOf(42).pow(31))
+    assert(new BigInteger("3511500884366740741319133039278240178576180323024896") equals BigInteger.valueOf(46).pow(31))
   }
 }

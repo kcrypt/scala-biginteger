@@ -224,7 +224,7 @@ class BigIntegerModPowTest extends wordspec.AnyWordSpec {
 
   "testmodInverse - #1764" in {
     def test(a: BigInt, b: BigInt, expexted: BigInt): Unit =
-      assert(a.modInverse(b) == expexted)
+      assert(a.modInverse(b) equals expexted)
 
     // Cases that failed due to the bug
     test(BigInt(1795804389L), BigInt(2957870813L), BigInt(2849476504L))
@@ -292,6 +292,6 @@ class BigIntegerModPowTest extends wordspec.AnyWordSpec {
     val modulus = new BigInteger("5746869377979713565535482943442831720005209173643665270846638168530759837688261")
     val result = that.modPow(exponent, modulus)
 
-    assert(result == new BigInteger("5460564903238843431550363269308342873211315346397855429778722709516677044851419"))
+    assert(result equals new BigInteger("5460564903238843431550363269308342873211315346397855429778722709516677044851419"))
   }
 }
