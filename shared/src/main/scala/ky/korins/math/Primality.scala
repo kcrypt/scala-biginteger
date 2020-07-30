@@ -93,31 +93,27 @@ private[math] object Primality {
     } else {
       val shiftCount = (-bitLength) & 31
       val count = (bitLength + 31) >> 5
-      val n = new BigInteger(1, count, new Array[Int](count))
+      val probPrime = new BigInteger(1, count, new Array[Int](count))
 
       val last = count - 1
       var sieve: Sieve = null
       do {
-        if (n.bitLength() != bitLength) {
+        if (probPrime.bitLength() != bitLength) {
           // To fill the array with random integers
           var i = 0
-          while (i < n.numberLength) {
-            n.digits(i) = rnd.nextInt()
+          while (i < probPrime.numberLength) {
+            probPrime.digits(i) = rnd.nextInt()
             i += 1
           }
           // To fix to the correct bitLength
-          n.digits(last) = (n.digits(last) | 0x80000000) >>> shiftCount
+          probPrime.digits(last) = (probPrime.digits(last) | 0x80000000) >>> shiftCount
           // To create an odd number
-          n.digits(0) |= 1
-          sieve = new Sieve(n, searchLen)
+          probPrime.digits(0) |= 1
+          sieve = new Sieve(probPrime, searchLen)
         }
 
-        sieve.retrieveNext(n, certainty) match {
-          case None =>
-            Elementary.inplaceAdd(n, searchLen)
-
-          case Some(probPrime) =>
-            return probPrime
+        if (sieve.checkSearchLen(probPrime, certainty)) {
+          return probPrime
         }
       } while (true)
       throw new AssertionError("Primality.consBigInteger: Should not get here")
@@ -215,29 +211,26 @@ private[math] object Primality {
      * "next prime" < 2*N
      */
     val a = new Array[Int](n.numberLength + 1)
-    val startPoint: BigInteger = new BigInteger(1, n.numberLength, a)
-    System.arraycopy(n.digits, 0, startPoint.digits, 0, n.numberLength)
+    val probPrime: BigInteger = new BigInteger(1, n.numberLength, a)
+    System.arraycopy(n.digits, 0, probPrime.digits, 0, n.numberLength)
 
     // To fix N to the "next odd number"
-    if (n.testBit(0)) Elementary.inplaceAdd(startPoint, 2)
-    else startPoint.digits(0) |= 1
+    if (n.testBit(0)) Elementary.inplaceAdd(probPrime, 2)
+    else probPrime.digits(0) |= 1
 
-    val sieve = new Sieve(startPoint, searchLen)
-    while (true) {
-      sieve.retrieveNext(startPoint, certainty) match {
-        case None =>
-          Elementary.inplaceAdd(startPoint, searchLen)
-        case Some(probPrime) =>
-          return probPrime
+    val sieve = new Sieve(probPrime, searchLen)
+    do {
+      if (sieve.checkSearchLen(probPrime, certainty)) {
+        return probPrime
       }
-    }
+    } while(true)
     throw new AssertionError("Primality.nextProbablePrime: Should not get here")
     // scalastyle:on return
   }
 
   // Implement sieve of Eratosthenes
   class Sieve(startPoint: BigInteger, searchLen: Int) {
-    private val modules = {
+    private val isDivisible = {
       val modules = new Array[Int](Primes.length)
 
       // To calculate modules: N mod p1, N mod p2, ... for first primes.
@@ -247,44 +240,43 @@ private[math] object Primality {
         i += 1
       }
 
-      modules
-    }
-
-    private val isDivisible = new Array[Boolean](searchLen)
-
-    def retrieveNext(from: BigInteger, certainty: Int): Option[BigInteger] = {
       // At this point, all numbers in the gap are initialized as probably primes
-      Arrays.fill(isDivisible, false)
+      val isDivisible = new Array[Boolean](searchLen)
+
       // To discard multiples of first primes
-      var i = 0
+      i = 0
       while (i < Primes.length) {
         modules(i) = (modules(i) + searchLen) % Primes(i)
         var j =
           if (modules(i) == 0) 0
-          else (Primes(i) - modules(i))
+          else Primes(i) - modules(i)
         while (j < searchLen) {
           isDivisible(j) = true
           j += Primes(i)
         }
         i += 1
       }
-      // To execute Miller-Rabin for non-divisible numbers by all first primes
+
+      isDivisible
+    }
+
+    def checkSearchLen(probPrime: BigInteger, certainty: Int): Boolean = {
       var j = 0
       var skip = 0
-      val probPrime = from.copy()
       while (j < searchLen) {
         if (!isDivisible(j)) {
           Elementary.inplaceAdd(probPrime, skip)
           skip = 0
           if (isProbablePrimeImpl(probPrime, certainty)) {
-            return Some(probPrime)
+            return true
           }
         } else {
           skip += 1
         }
         j += 1
       }
-      None
+      Elementary.inplaceAdd(probPrime, skip)
+      false
     }
   }
 
