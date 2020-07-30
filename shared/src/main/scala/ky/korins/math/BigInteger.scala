@@ -572,12 +572,13 @@ class BigInteger extends Number with Comparable[BigInteger] {
     if (_hashCode != 0) {
       _hashCode
     } else {
+      var hashCode = 0
       var i = 0
       while (i < numberLength) {
-        _hashCode = _hashCode * 33 + digits(i)
+        hashCode = hashCode * 33 + digits(i)
         i += 1
       }
-      _hashCode = _hashCode * sign
+      _hashCode = hashCode * sign
       _hashCode
     }
   }
