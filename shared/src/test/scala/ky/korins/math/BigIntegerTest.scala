@@ -160,4 +160,11 @@ class BigIntegerTest extends wordspec.AnyWordSpec {
     assert(Arrays.equals(eBytesSignum, expSignum.toByteArray))
     assert(Arrays.equals(exp.toByteArray, expSignum.toByteArray))
   }
+
+  "uncache reset hashcode" in {
+    val bigInteger = new BigInteger("123")
+    val before = bigInteger.hashCode()
+    Elementary.inplaceAdd(bigInteger, 2)
+    assert(before != bigInteger.hashCode())
+  }
 }
