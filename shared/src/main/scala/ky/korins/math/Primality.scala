@@ -318,7 +318,7 @@ private[math] object Primality {
       }
 
       y = x.modPow(q, n)
-      if (!(y.isOne || y == nMinus1)) {
+      if (!(y.isOne || (y equals nMinus1))) {
         var j = 1
         while (j < k) {
           if (y != nMinus1) {
