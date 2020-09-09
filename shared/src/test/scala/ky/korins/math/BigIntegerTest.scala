@@ -167,4 +167,18 @@ class BigIntegerTest extends wordspec.AnyWordSpec {
     Elementary.inplaceAdd(bigInteger, 2)
     assert(before != bigInteger.hashCode())
   }
+
+  "nextProbablePrime returns the first prime" in {
+    val firstPrime = new BigInteger("234702379496804530857127341657568429621")
+    val nextPrime = firstPrime.nextProbablePrime()
+    val diff = (nextPrime subtract firstPrime).intValue()
+    assert(diff > 0)
+    var i = 1
+    while (i < diff) {
+      val candidate = firstPrime.add(BigInteger.valueOf(i))
+      val isCandidatePrime = candidate.isProbablePrime(100)
+      assert(!isCandidatePrime, s"is prime: $candidate")
+      i += 1
+    }
+  }
 }

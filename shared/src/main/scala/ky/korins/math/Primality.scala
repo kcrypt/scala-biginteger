@@ -266,7 +266,7 @@ private[math] object Primality {
       while (j < searchLen) {
         if (!isDivisible(j)) {
           Elementary.inplaceAdd(probPrime, skip)
-          skip = 0
+          skip = 1
           if (isProbablePrimeImpl(probPrime, certainty)) {
             return true
           }

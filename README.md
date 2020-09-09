@@ -21,6 +21,7 @@ The key idea of montgomery function is splitting it to `modSquare` and `modProp`
 This fork also fixed bugs:
  - prevented incorrect hashcode in highly concurrent environment
  - reset hashcode after `uncache()`
+ - `nextProbablePrime` returns not the next prime number, just a prime number that is bigger than specified
 
 For compare performance I've included to benchmarks BigInteger implementation from OpenJDK 14,
 but I haven't used any part of inside the code.
