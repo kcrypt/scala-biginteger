@@ -4,7 +4,7 @@ import org.openjdk.jmh.annotations._
 
 @State(Scope.Benchmark)
 class ProbablePrimeBenchmark extends BaseBenchmark {
-  @Param(Array("128", "512", "1024", "4096", "8192"))
+  @Param(Array("128", "512", "1024"))
   override var bits: Int = 0
 
   @Setup
