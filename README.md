@@ -37,7 +37,7 @@ All benchmarks was performed on `JDK 14.0.1, Java HotSpot(TM) 64-Bit Server VM, 
 Short summary:
  - JVM native implementation faster at all benchmarks
  - `divRem` faster for about 5% than JVM version and 10% than ScalaJS version,
- - `mod` faster for about 15% than JVM or ScalaJS implementation, and reduce sweepings
+ - `modPow` faster for about 15% than JVM or ScalaJS implementation, and reduce sweepings
    for about 50% when compare with JVM implementation, and 50 time when compare with ScalaJS implementation,
  - `nextProbablePrime` and `isProbablePrime` 30 time faster for integers for 1024 bit length. 
 
