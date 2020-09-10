@@ -42,4 +42,4 @@ Short summary:
  - `nextProbablePrime` and `isProbablePrime` 30 time faster for integers for 1024 bit length. 
 
 Full version also available as [jmh-result.json](jmh-result.json)
- or via [JMH Visualizer](https://jmh.morethan.io/?source=https://raw.githubusercontent.com/catap/scala-biginteger/master/jmh-result.json).
+ or via [JMH Visualizer](https://jmh.morethan.io/?gist=70a1ff7e2e4fa8b0102219e99f64b00a).
