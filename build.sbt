@@ -31,8 +31,6 @@ developers in ThisBuild := List(
   Developer(id="catap", name="Kirill A. Korinsky", email="kirill@korins.ky", url=url("https://github.com/catap"))
 )
 
-skip in publish := true
-
 lazy val biginteger = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .crossType(CrossType.Full)
   .in(file("."))
@@ -68,6 +66,7 @@ lazy val bench = project.in(file("bench"))
       "org.openjdk.jmh" % "jmh-core" % "1.25",
       "org.openjdk.jmh" % "jmh-generator-annprocess" % "1.25",
     ),
+    skip in publish := true,
     crossScalaVersions := Seq(scala213),
     assemblyJarName in assembly := "bench.jar",
     mainClass in assembly := Some("org.openjdk.jmh.Main"),
