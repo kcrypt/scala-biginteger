@@ -10,7 +10,7 @@ addSbtPlugin("org.scala-js"       % "sbt-scalajs"                   % scalaJSVer
 addSbtPlugin("org.scala-native"   % "sbt-scala-native"              % scalaNativeJSVersion)
 addSbtPlugin("ch.epfl.lamp"       % "sbt-dotty"                     % "0.4.2")
 
-addSbtPlugin("pl.project13.scala" % "sbt-jmh"                       % "0.3.7")
+addSbtPlugin("pl.project13.scala" % "sbt-jmh"                       % "0.4.0")
 addSbtPlugin("com.eed3si9n"       % "sbt-assembly"                  % "0.14.10")
 addSbtPlugin("com.typesafe.sbt"   % "sbt-native-packager"           % "1.7.3")
 addSbtPlugin("com.eed3si9n"       % "sbt-buildinfo"                 % "0.9.0")

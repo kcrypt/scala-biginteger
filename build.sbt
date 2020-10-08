@@ -65,8 +65,8 @@ lazy val bench = project.in(file("bench"))
   .enablePlugins(JmhPlugin)
   .settings(
     libraryDependencies ++= Seq(
-      "org.openjdk.jmh" % "jmh-core" % "1.23",
-      "org.openjdk.jmh" % "jmh-generator-annprocess" % "1.23",
+      "org.openjdk.jmh" % "jmh-core" % "1.25",
+      "org.openjdk.jmh" % "jmh-generator-annprocess" % "1.25",
     ),
     crossScalaVersions := Seq(scala213),
     assemblyJarName in assembly := "bench.jar",
