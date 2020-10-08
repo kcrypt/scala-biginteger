@@ -47,6 +47,8 @@ import scala.annotation.tailrec
 import BigInteger.QuotAndRem
 import ky.korins.math.Elementary.subtract
 
+import scala.language.implicitConversions
+
 /** Provides BigInteger division and modular arithmetic.
  *
  *  Object that provides all operations related with division and modular
@@ -354,10 +356,12 @@ private[math] object Division {
           }
         } else {
           // Use Knuth's algorithm of successive subtract and shifting
-          do {
+          while ({
             Elementary.inplaceSubtract(op2, op1)
             BitLevel.inplaceShiftRight(op2, op2.getLowestSetBit())
-          } while (op2.compareTo(op1) >= BigInteger.EQUALS)
+
+            op2.compareTo(op1) >= BigInteger.EQUALS
+          }) ()
         }
         // now op1 >= op2
         val swap: BigInteger = op2
@@ -394,7 +398,7 @@ private[math] object Division {
     if (lsb2 != 0)
       op2 >>>= lsb2
 
-    do {
+    while ({
       if (op1 >= op2) {
         op1 -= op2
         op1 >>>= java.lang.Integer.numberOfTrailingZeros(op1)
@@ -402,7 +406,9 @@ private[math] object Division {
         op2 -= op1
         op2 >>>= java.lang.Integer.numberOfTrailingZeros(op2)
       }
-    } while (op1 != 0)
+
+      op1 != 0
+    }) ()
     op2 << pow2Count
   }
 
@@ -1067,11 +1073,13 @@ private[math] object Division {
     val m0: Long = a.digits(0) & UINT_MAX
     var n2: Long = 1L
     var powerOfTwo: Long = 2L
-    do {
+    while ({
       if (((m0 * n2) & powerOfTwo) != 0)
         n2 |= powerOfTwo
       powerOfTwo <<= 1
-    } while (powerOfTwo < 0x100000000L)
+
+      powerOfTwo < 0x100000000L
+    }) ()
     n2 = -n2
     (n2 & UINT_MAX).toInt
   }
@@ -1128,11 +1136,11 @@ private[math] object Division {
     val j: Int = (s + m - 1) / m
     val n: Int = j * m
     val n32: Long = n.toLong << 5
-    val sigma: Int = math.max(0, n32 - bSrc.bitLength).toInt
+    val sigma: Int = math.max(0, n32 - bSrc.bitLength()).toInt
     val a = aSrc.shiftLeft(sigma)
     val b = bSrc.shiftLeft(sigma)
 
-    var t: Int = ((a.bitLength + n32) / n32).toInt
+    var t: Int = ((a.bitLength() + n32) / n32).toInt
     if (t < 2) {
       t = 2
     }

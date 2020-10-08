@@ -21,6 +21,8 @@ package ky.korins.math
 
 import org.scalatest.wordspec
 
+import scala.language.implicitConversions
+
 class BigIntegerToStringTest extends wordspec.AnyWordSpec {
 
   "tes10PosVerySmall" in {

@@ -14,6 +14,8 @@ package ky.korins.math
 
 import org.scalatest.wordspec
 
+import scala.language.implicitConversions
+
 class BigDecimalToStringTest extends wordspec.AnyWordSpec {
 
   "toStringWithCornerCaseScales" in {

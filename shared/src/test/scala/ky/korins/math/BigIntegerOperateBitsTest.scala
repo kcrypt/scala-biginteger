@@ -21,6 +21,8 @@ package ky.korins.math
 
 import org.scalatest.wordspec
 
+import scala.language.implicitConversions
+
 class BigIntegerOperateBitsTest extends wordspec.AnyWordSpec {
 
   "BitCountNeg" in {

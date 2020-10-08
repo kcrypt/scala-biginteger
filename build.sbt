@@ -4,13 +4,15 @@ lazy val scala211 = "2.11.12"
 lazy val scala212 = "2.12.11"
 lazy val scala213 = "2.13.2"
 
+lazy val dotty = "0.27.0-RC1"
+
 lazy val scalatestVersion = "3.2.2"
 
 name := "biginteger"
 organization in ThisBuild := "ky.korins"
 version in ThisBuild := "1.0.0-SNAPSHOT"
 scalaVersion in ThisBuild := scala213
-crossScalaVersions in ThisBuild := Seq(scala212, scala211, scala213)
+crossScalaVersions in ThisBuild := Seq(scala212, scala211, scala213, dotty)
 scalacOptions in ThisBuild ++= Seq("-unchecked", "-deprecation")
 
 publishTo in ThisBuild := sonatypePublishTo.value
@@ -47,6 +49,9 @@ lazy val biginteger = crossProject(JSPlatform, JVMPlatform, NativePlatform)
     libraryDependencies ++= Seq(
       "org.scalatest" %%% "scalatest" % scalatestVersion % Test,
     )
+  )
+  .jsSettings(
+    crossScalaVersions := Seq(scala211, scala212, scala213)
   )
   .nativeSettings(
     scalaVersion := scala211,

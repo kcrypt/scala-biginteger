@@ -23,6 +23,8 @@ import java.util.Random
 
 import org.scalatest.wordspec
 
+import scala.language.implicitConversions
+
 class BigIntegerConstructorsTest extends wordspec.AnyWordSpec {
 
   "ConstructorBytesException" in {

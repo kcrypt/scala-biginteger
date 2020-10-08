@@ -21,6 +21,8 @@ package ky.korins.math
 
 import org.scalatest.wordspec
 
+import scala.language.implicitConversions
+
 class BigIntegerOrTest extends wordspec.AnyWordSpec {
 
   "NegNegFirstLonger" in {

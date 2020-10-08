@@ -44,6 +44,8 @@ package ky.korins.math
 import java.util.Arrays
 import java.util.Random
 
+import scala.language.implicitConversions
+
 /** Provides primality probabilistic methods. */
 private[math] object Primality {
   val searchLen = 1024 // for searching of the next probable prime number
@@ -97,7 +99,7 @@ private[math] object Primality {
 
       val last = count - 1
       var sieve: Sieve = null
-      do {
+      while (true) {
         if (probPrime.bitLength() != bitLength) {
           // To fill the array with random integers
           var i = 0
@@ -115,7 +117,7 @@ private[math] object Primality {
         if (sieve.checkSearchLen(probPrime, certainty)) {
           return probPrime
         }
-      } while (true)
+      }
       throw new AssertionError("Primality.consBigInteger: Should not get here")
     }
   }
@@ -219,11 +221,11 @@ private[math] object Primality {
     else probPrime.digits(0) |= 1
 
     val sieve = new Sieve(probPrime, searchLen)
-    do {
+    while (true) {
       if (sieve.checkSearchLen(probPrime, certainty)) {
         return probPrime
       }
-    } while(true)
+    }
     throw new AssertionError("Primality.nextProbablePrime: Should not get here")
     // scalastyle:on return
   }
@@ -312,9 +314,11 @@ private[math] object Primality {
          * methods would call Miller-Rabin with t <= 50 so this part is only to
          * do more robust the algorithm
          */
-        do {
+        while ({
           x = new BigInteger(bitLength, rnd)
-        } while ((x.compareTo(n) >= BigInteger.EQUALS) || x.sign == 0 || x.isOne)
+
+          (x.compareTo(n) >= BigInteger.EQUALS) || x.sign == 0 || x.isOne
+        }) ()
       }
 
       y = x.modPow(q, n)

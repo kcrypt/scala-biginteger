@@ -43,8 +43,9 @@ package ky.korins.math
 
 import scala.annotation.tailrec
 
-import java.util.Arrays
 import java.util.Random
+
+import scala.language.implicitConversions
 
 object BigInteger {
 
@@ -494,7 +495,7 @@ class BigInteger extends Number with Comparable[BigInteger] {
       else r.quot.negate()
 
     val rem =
-      if (signum >= 0) r.rem
+      if (signum() >= 0) r.rem
       else r.rem.negate()
 
     new QuotAndRem(quot, rem)
@@ -638,7 +639,7 @@ class BigInteger extends Number with Comparable[BigInteger] {
     if (m.sign <= 0)
       throw new ArithmeticException("BigInteger: modulus not positive")
 
-    var base = if (signum < 0 || compareTo(m) >= 0) mod(m) else this
+    var base = if (signum() < 0 || compareTo(m) >= 0) mod(m) else this
 
     if (m.isOne || (_exponent.sign > 0 && base.sign == 0)) {
       BigInteger.ZERO

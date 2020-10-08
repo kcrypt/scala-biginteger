@@ -21,6 +21,8 @@ package ky.korins.math
 
 import org.scalatest.wordspec
 
+import scala.language.implicitConversions
+
 class BigIntegerDivideTest extends wordspec.AnyWordSpec {
 
   def compareBZandKnuth(a: BigInteger, b: BigInteger): Unit = {

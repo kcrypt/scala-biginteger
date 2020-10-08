@@ -16,6 +16,8 @@ import java.util.Arrays
 
 import org.scalatest.wordspec
 
+import scala.language.implicitConversions
+
 class BigIntegerTest extends wordspec.AnyWordSpec {
 
   "accept 3 as a Byte Array" in {
@@ -94,28 +96,28 @@ class BigIntegerTest extends wordspec.AnyWordSpec {
     val eBytesSignum = Array[Byte](27, -15, 65, 39)
     val eBytes = Array[Byte](27, -15, 65, 39)
     val expSignum = new BigInteger(eBytesSignum)
-    assert(Arrays.equals(eBytes, expSignum.toByteArray))
+    assert(Arrays.equals(eBytes, expSignum.toByteArray()))
   }
 
   "intialise from byte array of Neg two's complement" in {
     val eBytesSignum = Array[Byte](-27, -15, 65, 39)
     val eBytes = Array[Byte](-27, -15, 65, 39)
     val expSignum = new BigInteger(eBytesSignum)
-    assert(Arrays.equals(eBytes, expSignum.toByteArray))
+    assert(Arrays.equals(eBytes, expSignum.toByteArray()))
   }
 
   "intialise from Pos byte array with explicit sign" in {
     val eBytes = Array[Byte](27, -15, 65, 39)
     val eSign = 1
     val exp = new BigInteger(eSign, eBytes)
-    assert(Arrays.equals(eBytes, exp.toByteArray))
+    assert(Arrays.equals(eBytes, exp.toByteArray()))
   }
 
   "intialise from Zero byte array with explicit sign" in {
     val eBytes = Array[Byte](0, 0, 0, 0)
     val eSign = 0
     val exp = new BigInteger(eSign, eBytes)
-    assert(Arrays.equals(Array[Byte](0), exp.toByteArray))
+    assert(Arrays.equals(Array[Byte](0), exp.toByteArray()))
   }
 
   "intialise from Neg small byte array with explicit sign" in {
@@ -123,7 +125,7 @@ class BigIntegerTest extends wordspec.AnyWordSpec {
     val eSign = -1
     val eRes = Array[Byte](-27)
     val exp = new BigInteger(eSign, eBytes)
-    assert(Arrays.equals(eRes, exp.toByteArray))
+    assert(Arrays.equals(eRes, exp.toByteArray()))
   }
 
   "intialise from Neg byte array with explicit sign" in {
@@ -131,7 +133,7 @@ class BigIntegerTest extends wordspec.AnyWordSpec {
     val eSign = -1
     val eRes = Array[Byte](-28, 14, -66, -39)
     val exp = new BigInteger(eSign, eBytes)
-    assert(Arrays.equals(eRes, exp.toByteArray))
+    assert(Arrays.equals(eRes, exp.toByteArray()))
   }
 
   "intialise both Pos byte arrays arrays the same" in {
@@ -142,9 +144,9 @@ class BigIntegerTest extends wordspec.AnyWordSpec {
     val expSignum = new BigInteger(eBytesSignum)
 
     assert(0 == expSignum.compareTo(exp))
-    assert(Arrays.equals(eBytes, exp.toByteArray))
-    assert(Arrays.equals(eBytes, expSignum.toByteArray))
-    assert(Arrays.equals(exp.toByteArray, expSignum.toByteArray))
+    assert(Arrays.equals(eBytes, exp.toByteArray()))
+    assert(Arrays.equals(eBytes, expSignum.toByteArray()))
+    assert(Arrays.equals(exp.toByteArray(), expSignum.toByteArray()))
   }
 
   "intialise both Neg byte arrays arrays the same" in {
@@ -156,9 +158,9 @@ class BigIntegerTest extends wordspec.AnyWordSpec {
     val expSignum = new BigInteger(eBytesSignum)
 
     assert(exp.toString == expSignum.toString)
-    assert(Arrays.equals(eRes, exp.toByteArray))
-    assert(Arrays.equals(eBytesSignum, expSignum.toByteArray))
-    assert(Arrays.equals(exp.toByteArray, expSignum.toByteArray))
+    assert(Arrays.equals(eRes, exp.toByteArray()))
+    assert(Arrays.equals(eBytesSignum, expSignum.toByteArray()))
+    assert(Arrays.equals(exp.toByteArray(), expSignum.toByteArray()))
   }
 
   "uncache reset hashcode" in {

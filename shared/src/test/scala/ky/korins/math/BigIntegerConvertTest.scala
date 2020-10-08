@@ -21,6 +21,8 @@ package ky.korins.math
 
 import org.scalatest.wordspec
 
+import scala.language.implicitConversions
+
 class BigIntegerConvertTest extends wordspec.AnyWordSpec {
 
   // Wrappers to overstep https://github.com/scala-native/scala-native/issues/1836

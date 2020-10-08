@@ -21,6 +21,8 @@ package ky.korins.math
 
 import org.scalatest.wordspec
 
+import scala.language.implicitConversions
+
 class BigIntegerCompareTest extends wordspec.AnyWordSpec {
 
 
@@ -381,7 +383,7 @@ class BigIntegerCompareTest extends wordspec.AnyWordSpec {
       for (i <- 0 until resBytes.length) {
         assert(rBytes(i) == resBytes(i))
       }
-     assert(0 == result.signum())
+      assert(0 == result.signum())
     }
 
     "tassestSignumNegative" in {

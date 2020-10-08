@@ -25,6 +25,8 @@ package ky.korins.math
 
 import scala.annotation.tailrec
 
+import scala.language.implicitConversions
+
 /** Provides {@link BigInteger} base conversions.
  *
  *  Static library that provides {@link BigInteger} base conversion from/to any
@@ -177,7 +179,7 @@ private[math] object Conversion {
       var tempLen = numberLength
       System.arraycopy(digits, 0, temp, 0, tempLen)
 
-      do {
+      while ({
         // Divide the array of digits by 1000000000 and compute the remainder
         var rem: Int = 0
         var i: Int = tempLen - 1
@@ -194,9 +196,12 @@ private[math] object Conversion {
         val padding = "000000000".substring(remStr.length)
         result = padding + remStr + result
 
-        while ((tempLen != 0) && (temp(tempLen - 1) == 0))
+        while ((tempLen != 0) && (temp(tempLen - 1) == 0)) {
           tempLen -= 1
-      } while (tempLen != 0)
+        }
+
+        tempLen != 0
+      }) ()
 
       result = dropLeadingZeros(result)
 
@@ -245,12 +250,14 @@ private[math] object Conversion {
       var currentChar = resLengthInChars
 
       var v: Long = if (negNumber) -value else value
-      do {
+      while ({
         val prev = v
         v /= 10
         currentChar -= 1
         result = (prev - v * 10).toInt.toString + result
-      } while (v != 0)
+
+        v != 0
+      }) ()
 
       val exponent: Long = resLengthInChars - currentChar - scale.toLong - 1
 

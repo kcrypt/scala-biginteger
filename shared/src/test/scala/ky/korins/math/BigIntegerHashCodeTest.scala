@@ -21,6 +21,8 @@ package ky.korins.math
 
 import org.scalatest.wordspec
 
+import scala.language.implicitConversions
+
 class BigIntegerHashCodeTest extends wordspec.AnyWordSpec {
 
   "EqualObjects" in {
