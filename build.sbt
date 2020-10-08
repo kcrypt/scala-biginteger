@@ -4,7 +4,7 @@ lazy val scala211 = "2.11.12"
 lazy val scala212 = "2.12.11"
 lazy val scala213 = "2.13.2"
 
-lazy val scalatestVersion = "3.2.0"
+lazy val scalatestVersion = "3.2.2"
 
 name := "biginteger"
 organization in ThisBuild := "ky.korins"
