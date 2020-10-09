@@ -72,6 +72,7 @@ lazy val bench = project.in(file("bench"))
     assemblyJarName in assembly := "bench.jar",
     mainClass in assembly := Some("org.openjdk.jmh.Main"),
     test in assembly := {},
+    javacOptions ++= Seq("-source", "9"),
     scalacOptions ++= Seq(
       "-opt:_",
       "-Xlint:_,-nonlocal-return,-unit-special",
