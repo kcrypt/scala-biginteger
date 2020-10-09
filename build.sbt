@@ -11,7 +11,7 @@ lazy val scalatestVersion = "3.2.2"
 name := "biginteger"
 organization in ThisBuild := "ky.korins"
 version in ThisBuild := "1.0.0-SNAPSHOT"
-scalaVersion in ThisBuild := scala213
+scalaVersion in ThisBuild := dotty
 crossScalaVersions in ThisBuild := Seq(scala212, scala211, scala213, dotty)
 scalacOptions in ThisBuild ++= Seq("-unchecked", "-deprecation")
 
@@ -49,6 +49,7 @@ lazy val biginteger = crossProject(JSPlatform, JVMPlatform, NativePlatform)
     )
   )
   .jsSettings(
+    scalaVersion := scala213,
     crossScalaVersions := Seq(scala211, scala212, scala213)
   )
   .nativeSettings(
@@ -58,7 +59,6 @@ lazy val biginteger = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   )
 
 lazy val bench = project.in(file("bench"))
-  .dependsOn(biginteger.jvm)
   .enablePlugins(JavaAppPackaging)
   .enablePlugins(JmhPlugin)
   .settings(
@@ -67,7 +67,8 @@ lazy val bench = project.in(file("bench"))
       "org.openjdk.jmh" % "jmh-generator-annprocess" % "1.25",
     ),
     skip in publish := true,
-    crossScalaVersions := Seq(scala213),
+    scalaVersion in ThisBuild := scala213,
+    crossScalaVersions in ThisBuild := Seq(scala213),
     assemblyJarName in assembly := "bench.jar",
     mainClass in assembly := Some("org.openjdk.jmh.Main"),
     test in assembly := {},
@@ -81,4 +82,5 @@ lazy val bench = project.in(file("bench"))
     },
     assembly in Jmh := (assembly in Jmh).dependsOn(Keys.compile in Jmh).value
   )
+  .dependsOn(biginteger.jvm)
 
