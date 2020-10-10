@@ -12,29 +12,22 @@ name := "biginteger"
 organization in ThisBuild := "ky.korins"
 version in ThisBuild := "1.0.0-SNAPSHOT"
 scalaVersion in ThisBuild := dotty
-crossScalaVersions in ThisBuild := Seq(scala212, scala211, scala213, dotty)
-scalacOptions in ThisBuild ++= Seq("-unchecked", "-deprecation")
+crossScalaVersions in ThisBuild := Seq()
 
-publishTo in ThisBuild := sonatypePublishToBundle.value
-sonatypeProfileName in ThisBuild := "ky.korins"
-publishMavenStyle in ThisBuild := true
-sonatypeProjectHosting in ThisBuild := Some(xerial.sbt.Sonatype.GitHubHosting("catap", "scala-biginteger", "kirill@korins.ky"))
-licenses in ThisBuild := Seq("Apache-2.0" -> url("https://github.com/catap/scala-biginteger/blob/master/LICENSE.txt"))
-homepage in ThisBuild := Some(url("https://github.com/catap/scala-biginteger"))
-scmInfo in ThisBuild := Some(
-  ScmInfo(
-    url("https://github.com/catap/scala-biginteger"),
-    "scm:git@github.com:catap/scala-biginteger.git"
-  )
+scalacOptions in ThisBuild ++= Seq(
+  "-target:jvm-1.8",
+  "-unchecked",
+  "-deprecation"
 )
-developers in ThisBuild := List(
-  Developer(id="catap", name="Kirill A. Korinsky", email="kirill@korins.ky", url=url("https://github.com/catap"))
-)
+
+// This code isn't ready to publishing yet
+publishTo in ThisBuild := None // sonatypePublishToBundle.value
 
 lazy val biginteger = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .crossType(CrossType.Full)
   .in(file("."))
   .enablePlugins(BuildInfoPlugin)
+  .settings(disableDottyDocs)
   .settings(
     skip in publish := false,
     publishArtifact in Test := false,
@@ -47,6 +40,10 @@ lazy val biginteger = crossProject(JSPlatform, JVMPlatform, NativePlatform)
     libraryDependencies ++= Seq(
       "org.scalatest" %%% "scalatest" % scalatestVersion % Test,
     )
+  )
+  .jvmSettings(
+    scalaVersion := dotty,
+    crossScalaVersions := Seq(scala212, scala211, scala213, dotty)
   )
   .jsSettings(
     scalaVersion := scala213,
@@ -61,14 +58,16 @@ lazy val biginteger = crossProject(JSPlatform, JVMPlatform, NativePlatform)
 lazy val bench = project.in(file("bench"))
   .enablePlugins(JavaAppPackaging)
   .enablePlugins(JmhPlugin)
+  .dependsOn(biginteger.jvm)
+  .settings(disableDottyDocs)
   .settings(
     libraryDependencies ++= Seq(
       "org.openjdk.jmh" % "jmh-core" % "1.25",
       "org.openjdk.jmh" % "jmh-generator-annprocess" % "1.25",
     ),
     skip in publish := true,
-    scalaVersion in ThisBuild := scala213,
-    crossScalaVersions in ThisBuild := Seq(scala213),
+    scalaVersion := scala213,
+    crossScalaVersions := Seq(scala213),
     assemblyJarName in assembly := "bench.jar",
     mainClass in assembly := Some("org.openjdk.jmh.Main"),
     test in assembly := {},
@@ -83,5 +82,14 @@ lazy val bench = project.in(file("bench"))
     },
     assembly in Jmh := (assembly in Jmh).dependsOn(Keys.compile in Jmh).value
   )
-  .dependsOn(biginteger.jvm)
 
+// Dotty has at least two bugs in docs generation:
+//  - it copies whole project to _site
+//  - it creates empty javadocs artifact.
+// Details: https://github.com/lampepfl/dotty/issues/8769
+// Let disable it
+lazy val disableDottyDocs = Seq(
+  sources in (Compile, doc) := {
+    if (isDotty.value) Seq() else (sources in (Compile, doc)).value
+  }
+)
