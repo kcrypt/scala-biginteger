@@ -1,7 +1,7 @@
 import sbtcrossproject.CrossPlugin.autoImport.crossProject
 
 lazy val scala211 = "2.11.12"
-lazy val scala212 = "2.12.11"
+lazy val scala212 = "2.12.12"
 lazy val scala213 = "2.13.3"
 
 lazy val dotty = "0.27.0-RC1"
