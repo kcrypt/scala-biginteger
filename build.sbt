@@ -26,7 +26,6 @@ lazy val biginteger = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .crossType(CrossType.Full)
   .in(file("."))
   .enablePlugins(BuildInfoPlugin)
-  .settings(disableDottyDocs)
   .settings(
     skip in publish := false,
     publishArtifact in Test := false,
@@ -58,7 +57,6 @@ lazy val bench = project.in(file("bench"))
   .enablePlugins(JavaAppPackaging)
   .enablePlugins(JmhPlugin)
   .dependsOn(biginteger.jvm)
-  .settings(disableDottyDocs)
   .settings(
     libraryDependencies ++= Seq(
       "org.openjdk.jmh" % "jmh-core" % "1.25",
@@ -81,14 +79,3 @@ lazy val bench = project.in(file("bench"))
     },
     assembly in Jmh := (assembly in Jmh).dependsOn(Keys.compile in Jmh).value
   )
-
-// Dotty has at least two bugs in docs generation:
-//  - it copies whole project to _site
-//  - it creates empty javadocs artifact.
-// Details: https://github.com/lampepfl/dotty/issues/8769
-// Let disable it
-lazy val disableDottyDocs = Seq(
-  sources in (Compile, doc) := {
-    if (isDotty.value) Seq() else (sources in (Compile, doc)).value
-  }
-)
