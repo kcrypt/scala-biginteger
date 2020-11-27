@@ -1,7 +1,6 @@
 # BigInteger for scala
 
-This is optimized implementation of BigInteger on scala for scala, scala-js and scala-native.
-With Scala3 aka Dotty support.
+This is highly optimized implementation of BigInteger on scala for scala, scala-js and scala-native.
 
 As the base it is used scala-js implementation that was ported from java by Alistair Johnson
  that is technically GWT/Harmony/IBM JDK implementation.

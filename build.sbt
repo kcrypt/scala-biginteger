@@ -19,6 +19,9 @@ scalacOptions in ThisBuild ++= Seq(
   "-deprecation"
 )
 
+licenses := LicenseDefinition.licenses
+headerLicense := LicenseDefinition.template
+
 // This code isn't ready to publishing yet
 publishTo in ThisBuild := None // sonatypePublishToBundle.value
 
@@ -26,6 +29,7 @@ lazy val biginteger = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .crossType(CrossType.Full)
   .in(file("."))
   .enablePlugins(BuildInfoPlugin)
+  .enablePlugins(AutomateHeaderPlugin)
   .settings(
     skip in publish := false,
     publishArtifact in Test := false,
@@ -37,7 +41,9 @@ lazy val biginteger = crossProject(JSPlatform, JVMPlatform, NativePlatform)
     buildInfoPackage := "ky.korins.math",
     libraryDependencies ++= Seq(
       "org.scalatest" %%% "scalatest" % scalatestVersion % Test,
-    )
+    ),
+    licenses := LicenseDefinition.licenses,
+    headerLicense := LicenseDefinition.template
   )
   .jvmSettings(
     scalaVersion := scala3,
@@ -73,6 +79,11 @@ lazy val bench = project.in(file("bench"))
       "-opt:_",
       "-Xlint:_,-nonlocal-return,-unit-special",
     ),
+    licenses := LicenseDefinition.licenses,
+    headerLicense := LicenseDefinition.template,
+    excludeFilter in headerSources := HiddenFileFilter || {
+      new SimpleFileFilter(_.getCanonicalPath contains "/original/")
+    },
     assemblyMergeStrategy in assembly := {
       case PathList("META-INF", "MANIFEST.MF") => MergeStrategy.discard
       case _ => MergeStrategy.first
