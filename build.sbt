@@ -70,7 +70,6 @@ lazy val bench = project.in(file("bench"))
     ),
     skip in publish := true,
     scalaVersion := scala213,
-    crossScalaVersions := Seq(scala213),
     assemblyJarName in assembly := "bench.jar",
     mainClass in assembly := Some("org.openjdk.jmh.Main"),
     test in assembly := {},
