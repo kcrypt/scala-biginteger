@@ -61,7 +61,6 @@ package ky.korins.math
 
 import java.util.Arrays
 
-import scala.annotation.tailrec
 import BigInteger.QuotAndRem
 import ky.korins.math.Elementary.subtract
 
@@ -145,9 +144,9 @@ private[math] object Division {
         if (guessDigit != 0) {
           guessDigit += 1 // to have the proper value in the loop below
 
-          @inline
-          @tailrec
-          def loop(): Unit = {
+          while ({
+            var oneMoreTime = false
+
             guessDigit -= 1
             // leftHand always fits in an unsigned long
             val leftHand: Long =
@@ -162,11 +161,13 @@ private[math] object Division {
             if ((longR >>> 32).toInt == 0) {
               rem = longR.toInt
 
-              if ((leftHand ^ Long.MinValue) > (rightHand ^ Long.MinValue))
-                loop()
+              if ((leftHand ^ Long.MinValue) > (rightHand ^ Long.MinValue)) {
+                oneMoreTime = true
+              }
             }
-          }
-          loop()
+
+            oneMoreTime
+          }) ()
         }
       }
 
@@ -355,9 +356,9 @@ private[math] object Division {
       op2 = swap
     }
 
-    @inline
-    @tailrec
-    def loop(): Unit = {
+    while ({
+      var oneMoreTime = false
+
       // INV: op2 >= op1 && both are odd unless op1 = 0
 
       // Optimization for small operands
@@ -386,11 +387,11 @@ private[math] object Division {
         op2 = op1
         op1 = swap
         if (op1.sign != 0)
-          loop()
+          oneMoreTime = true
       }
-    }
 
-    loop()
+      oneMoreTime
+    }) ()
     op2.shiftLeft(pow2Count)
   }
 
@@ -581,9 +582,9 @@ private[math] object Division {
         k += toShift
       }
 
-      @inline
-      @tailrec
-      def loop(): Unit = {
+      while ({
+        var oneMoreTime = false
+
         if (u.compareTo(v) <= BigInteger.EQUALS) {
           Elementary.inplaceSubtract(v, u)
           if (v.signum() != 0) {
@@ -592,11 +593,12 @@ private[math] object Division {
             Elementary.inplaceAdd(s, r)
             BitLevel.inplaceShiftLeft(r, toShift)
             k += toShift
-            loop()
+            oneMoreTime = true
           }
         }
-      }
-      loop()
+
+        oneMoreTime
+      }) ()
     }
 
     if (!u.isOne) // u is the gcd

@@ -961,36 +961,39 @@ class BigInteger extends Number with Comparable[BigInteger] {
     digits(numberLength - 1) = -1
     // Put bytes to the int array starting from the end of the byte array
 
-    @inline
-    @tailrec
-    def loop(): Unit = if (bytesLen > highBytes) {
-      digits(i) =
-        (byteValues(bytesLen - 1) & 0xFF)       |
-        (byteValues(bytesLen - 2) & 0xFF) << 8  |
-        (byteValues(bytesLen - 3) & 0xFF) << 16 |
-        (byteValues(bytesLen - 4) & 0xFF) << 24
-      bytesLen -= 4
-      if (digits(i) != 0) {
-        digits(i) = -digits(i)
-        firstNonzeroDigit = i
-        i += 1
-        while (bytesLen > highBytes) {
-          digits(i) =
-            (byteValues(bytesLen - 1) & 0xFF)       |
-            (byteValues(bytesLen - 2) & 0xFF) << 8  |
+    while ({
+      var oneMoreTime = false
+
+      if (bytesLen > highBytes) {
+        digits(i) =
+          (byteValues(bytesLen - 1) & 0xFF) |
+            (byteValues(bytesLen - 2) & 0xFF) << 8 |
             (byteValues(bytesLen - 3) & 0xFF) << 16 |
             (byteValues(bytesLen - 4) & 0xFF) << 24
-          bytesLen -= 4
-          digits(i) = ~digits(i)
+        bytesLen -= 4
+        if (digits(i) != 0) {
+          digits(i) = -digits(i)
+          firstNonzeroDigit = i
           i += 1
+          while (bytesLen > highBytes) {
+            digits(i) =
+              (byteValues(bytesLen - 1) & 0xFF) |
+                (byteValues(bytesLen - 2) & 0xFF) << 8 |
+                (byteValues(bytesLen - 3) & 0xFF) << 16 |
+                (byteValues(bytesLen - 4) & 0xFF) << 24
+            bytesLen -= 4
+            digits(i) = ~digits(i)
+            i += 1
+          }
+        } else {
+          i += 1
+          oneMoreTime = true
         }
-      } else {
-        i += 1
-        loop()
       }
-    }
 
-    loop()
+      oneMoreTime
+    }) ()
+
     if (highBytes != 0) {
       // Put the first bytes in the highest element of the int array
       if (firstNonzeroDigit != firstNonzeroDigitNotSet) {
