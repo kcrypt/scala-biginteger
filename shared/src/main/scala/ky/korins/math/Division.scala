@@ -135,8 +135,7 @@ private[math] object Division {
         val product: Long =
           ((normA(j) & UINT_MAX) << 32) + (normA(j - 1) & UINT_MAX)
         val firstDivisorDigitLong = firstDivisorDigit & UINT_MAX
-        val quotient =
-          java.lang.Long.divideUnsigned(product, firstDivisorDigitLong)
+        val quotient = divideUnsigned(product, firstDivisorDigitLong)
         guessDigit = quotient.toInt
         var rem = (product - quotient * firstDivisorDigitLong).toInt
 
@@ -259,7 +258,7 @@ private[math] object Division {
     var i = srcLength - 1
     while (i >= 0) {
       val temp: Long = (rem.toLong << 32) | (src(i) & UINT_MAX)
-      val quot = java.lang.Long.divideUnsigned(temp, bLong)
+      val quot = divideUnsigned(temp, bLong)
       rem = (temp - quot * bLong).toInt
       dest(i) = quot.toInt
       i -= 1
@@ -970,7 +969,7 @@ private[math] object Division {
     var i = srcLength - 1
     while (i >= 0) {
       val temp = (result.toLong << 32) | (src(i).toLong & UINT_MAX)
-      result = java.lang.Long.remainderUnsigned(temp, longDivisor).toInt
+      result = remainderUnsigned(temp, longDivisor).toInt
       i -= 1
     }
     result
@@ -1249,5 +1248,49 @@ private[math] object Division {
     val mag: Array[Int] = new Array[Int](n)
     Arrays.fill(mag, -1);
     new BigInteger(1, n, mag);
+  }
+
+  private def divideUnsigned(dividend: Long, divisor: Long): Long = {
+    if (divisor < 0) {
+      if (java.lang.Long.compareUnsigned(dividend, divisor) < 0) {
+        return 0 // dividend < divisor
+      } else {
+        return 1 // dividend >= divisor
+      }
+    }
+
+    if (dividend >= 0) {
+      return dividend / divisor
+    }
+
+    var quotient = ((dividend >>> 1) / divisor) << 1
+    val rem = dividend - quotient * divisor
+    if (java.lang.Long.compareUnsigned(rem, divisor) >= 0) {
+      quotient += 1
+    }
+
+    quotient
+  }
+
+  private def remainderUnsigned(dividend: Long, divisor: Long): Long = {
+    if (divisor < 0) {
+      if (java.lang.Long.compareUnsigned(dividend, divisor) < 0) {
+        return dividend // dividend < divisor
+      } else {
+        return dividend - divisor // dividend >= divisor
+      }
+    }
+
+    if (dividend >= 0) {
+      return dividend % divisor
+    }
+
+    val quotient = ((dividend >>> 1) / divisor) << 1
+    var rem = dividend - quotient * divisor
+    if (java.lang.Long.compareUnsigned(rem, divisor) >= 0) {
+      rem -= divisor
+    }
+
+    rem
   }
 }
