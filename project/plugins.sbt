@@ -12,7 +12,7 @@ addSbtPlugin("ch.epfl.lamp"       % "sbt-dotty"                     % "0.5.1")
 
 addSbtPlugin("pl.project13.scala" % "sbt-jmh"                       % "0.4.0")
 addSbtPlugin("com.eed3si9n"       % "sbt-assembly"                  % "0.15.0")
-addSbtPlugin("com.typesafe.sbt"   % "sbt-native-packager"           % "1.7.3")
+addSbtPlugin("com.typesafe.sbt"   % "sbt-native-packager"           % "1.8.0")
 addSbtPlugin("com.eed3si9n"       % "sbt-buildinfo"                 % "0.10.0")
 addSbtPlugin("com.jsuereth"       % "sbt-pgp"                       % "2.1.1")
 addSbtPlugin("org.xerial.sbt"     % "sbt-sonatype"                  % "3.9.4")
