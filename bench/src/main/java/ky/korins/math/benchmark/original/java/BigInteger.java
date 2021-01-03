@@ -115,7 +115,7 @@ import java.util.concurrent.ThreadLocalRandom;
  * -2<sup>{@code Integer.MAX_VALUE}</sup> (exclusive) to
  * +2<sup>{@code Integer.MAX_VALUE}</sup> (exclusive).
  *
- * @see     BigDecimal
+ * @see     java.math.BigDecimal
  * @jls     4.2.2 Integer Operations
  * @author  Josh Bloch
  * @author  Michael McCloskey
@@ -304,7 +304,7 @@ public class BigInteger extends Number implements Comparable<BigInteger> {
         if (val.length == 0) {
             throw new NumberFormatException("Zero length BigInteger");
         }
-        Objects.checkFromIndexSize(off, len, val.length);
+//        Objects.checkFromIndexSize(off, len, val.length);
 
         if (val[off] < 0) {
             mag = makePositive(val, off, len);
@@ -390,7 +390,7 @@ public class BigInteger extends Number implements Comparable<BigInteger> {
         if (signum < -1 || signum > 1) {
             throw(new NumberFormatException("Invalid signum value"));
         }
-        Objects.checkFromIndexSize(off, len, magnitude.length);
+//        Objects.checkFromIndexSize(off, len, magnitude.length);
 
         // stripLeadingZeroBytes() returns a zero length array if len == 0
         this.mag = stripLeadingZeroBytes(magnitude, off, len);
