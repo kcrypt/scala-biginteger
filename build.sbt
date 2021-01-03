@@ -6,6 +6,7 @@ lazy val scala213 = "2.13.3"
 lazy val scala3 = "3.0.0-M3"
 
 lazy val scalatestVersion = "3.2.3"
+lazy val jmhVersion = "1.27"
 
 name := "biginteger"
 organization in ThisBuild := "ky.korins"
@@ -65,8 +66,8 @@ lazy val bench = project.in(file("bench"))
   .dependsOn(biginteger.jvm)
   .settings(
     libraryDependencies ++= Seq(
-      "org.openjdk.jmh" % "jmh-core" % "1.25",
-      "org.openjdk.jmh" % "jmh-generator-annprocess" % "1.25",
+      "org.openjdk.jmh" % "jmh-core" % jmhVersion,
+      "org.openjdk.jmh" % "jmh-generator-annprocess" % jmhVersion,
     ),
     skip in publish := true,
     scalaVersion := scala213,
