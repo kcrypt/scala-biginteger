@@ -359,35 +359,67 @@ private[math] object Primality {
     // scalastyle:on return
   }
 
-  // Compute the jacobi symbol (a/n), as described at
-  // Digital signature standard (DSS). FIPS PUB 186-4, National Institute of Standards and Technology (NIST), 2013.
-  // pages 76-77
-  def jacobi(inint_a: BigInteger, inint_n: BigInteger): Int = {
-    var a = inint_a
-    var n = inint_n
-    var s = 1
+  /**
+   * Compute the jacobi symbol (a/n), as described at
+   * Digital signature standard (DSS).
+   * FIPS PUB 186-4, National Institute of Standards and Technology (NIST), 2013.
+   *
+   * Because it can be used for [[BigInteger]], it replaces recursively call to iteration.
+   */
+  def jacobi(a: BigInteger, n: BigInteger): Int = {
+    var _a = a
+    var _n = n
+    var _s = 1
 
-    a = a mod n
-    while (!(a equals BigInteger.ONE) && !(n equals BigInteger.ONE) && !(a equals BigInteger.ZERO)) {
-      a = a mod n
-      var e = 0
-      var a1 = a
+    if (_n.remainder(BigInteger.TWO) equals BigInteger.ZERO) {
+      throw new ArithmeticException("The bottom number (n) must be odd.")
+    }
 
-      while ((a1 and BigInteger.ONE) equals BigInteger.ZERO) {
-        e += 1
-        a1 = a1 shiftRight 1
+    while (true) {
+      // step 1
+      _a = _a mod _n
+
+      // step 2
+      if ((_a equals BigInteger.ONE) || (_n equals BigInteger.ONE)) {
+        return _s
       }
 
-      s *= ((if ((e & 0x1) == 0) 1 else {
-        val `n mod 8` = n mod BigInteger.EIGHT
-        if ((`n mod 8` equals BigInteger.ONE) || (`n mod 8` equals BigInteger.SEVEN)) 1
-        else -1
-      }) * (if (((n mod BigInteger.FOUR) equals BigInteger.THREE) && ((a1 mod BigInteger.FOUR) equals BigInteger.THREE)) -1 else 1))
+      // step 3
+      if (_a equals BigInteger.ZERO) {
+        return 0
+      }
 
-      a = n
-      n = a1
+      // step 4: a=2^e*_a1
+      var _e = 0
+      var _a1 = _a
+      while ((_a1 and BigInteger.ONE) equals BigInteger.ZERO) {
+        _e += 1
+        _a1 = _a1 shiftRight 1
+      }
+
+      // multiple to 1 doesn't mean anything so skip:
+      // Step 5 when e is event
+      // Step 5 when n mod 8 is 1 or 8
+      if ((_e & 0x1) != 0) {
+        val `n mod 8` = _n mod BigInteger.EIGHT
+        if ((`n mod 8` equals BigInteger.THREE) || (`n mod 8` equals BigInteger.FIVE)) {
+          _s = -_s
+        }
+      }
+
+      // step 6
+      if (((_n mod BigInteger.FOUR) equals BigInteger.THREE) && ((_a1 mod BigInteger.FOUR) equals BigInteger.THREE)) {
+        _s = -_s
+      }
+
+      // step 7
+      _a = _n
+      _n = _a1
+
+      // step 8: just iterate
     }
-    if (!(a equals BigInteger.ZERO)) s else 0
+
+    throw new AssertionError("jacobi: Should not get here")
   }
 
   /* Lucas-Lehmer probable prime. */
