@@ -6,7 +6,7 @@ object LicenseDefinition {
   val template: Option[License.Custom] = Some(HeaderLicense.Custom(
     """scala-biginteger - highly optimized BigInteger implementation for scala, scala-js and scala-native.
       |
-      |Copyright 2020 Kirill A. Korinsky <kirill@korins.ky>
+      |Copyright 2020, 2021 Kirill A. Korinsky <kirill@korins.ky>
       |
       |Licensed under the Apache License, Version 2.0 (the "License"); you may not
       |use this file except in compliance with the License. You may obtain a copy of
