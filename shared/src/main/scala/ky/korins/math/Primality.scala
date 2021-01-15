@@ -335,7 +335,6 @@ private[math] object Primality {
     var u = BigInteger.ONE
     var v = BigInteger.ONE
 
-    // for (int i=k.bitLength()-2; i >= 0; i--) {
     var i = k.bitLength() - 2
     while (i >= 0) {
       var u2 = u multiply v mod n
