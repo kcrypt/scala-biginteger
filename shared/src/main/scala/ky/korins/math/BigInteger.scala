@@ -102,6 +102,8 @@ object BigInteger {
   /** The {@code BigInteger} constant -1 used for comparison. */
   private[math] final val MINUS_ONE = new BigInteger(-1, 1)
 
+  private[math] final val MINUS_THREE = new BigInteger(-1, 3)
+
   /** 2^32. */
   private final val POW32 = 4294967296d
 

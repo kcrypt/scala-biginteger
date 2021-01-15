@@ -424,11 +424,19 @@ private[math] object Primality {
 
   /* Lucas-Lehmer probable prime. */
   private def lucasLehmer(n: BigInteger): Boolean = {
-    var d = BigInteger.FIVE
-    while (jacobi(d, n) != -1) {
+    var d: BigInteger = BigInteger.MINUS_THREE
+    while ({
       d = if (d.sign < 0) d.abs() add BigInteger.TWO
       else (d add BigInteger.TWO).negate()
-    }
+      val j = jacobi(d, n)
+      // if jacobi symbol is zero, it isn't a prime
+      // it stastes in Section C.3.3 step 2 by
+      // FIPS PUB 186-4, National Institute of Standards and Technology (NIST), 2013
+      if (j == 0) {
+        return false
+      }
+      j != -1
+    })()
 
     val k = n add BigInteger.ONE
     var u = BigInteger.ONE
