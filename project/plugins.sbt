@@ -11,7 +11,7 @@ addSbtPlugin("org.scala-native"   % "sbt-scala-native"              % scalaNativ
 
 addSbtPlugin("pl.project13.scala" % "sbt-jmh"                       % "0.4.2")
 addSbtPlugin("com.eed3si9n"       % "sbt-assembly"                  % "0.15.0")
-addSbtPlugin("com.typesafe.sbt"   % "sbt-native-packager"           % "1.8.0")
+addSbtPlugin("com.typesafe.sbt"   % "sbt-native-packager"           % "1.8.1")
 addSbtPlugin("com.eed3si9n"       % "sbt-buildinfo"                 % "0.10.0")
 addSbtPlugin("com.jsuereth"       % "sbt-pgp"                       % "2.1.1")
 addSbtPlugin("org.xerial.sbt"     % "sbt-sonatype"                  % "3.9.7")
