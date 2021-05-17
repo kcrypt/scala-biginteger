@@ -6,7 +6,7 @@ lazy val scala213 = "2.13.4"
 lazy val scala3 = "3.0.0-RC1"
 
 lazy val scalatestVersion = "3.2.4"
-lazy val jmhVersion = "1.27"
+lazy val jmhVersion = "1.31"
 
 name := "biginteger"
 organization in ThisBuild := "ky.korins"
