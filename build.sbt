@@ -9,12 +9,12 @@ lazy val scalatestVersion = "3.2.8"
 lazy val jmhVersion = "1.31"
 
 name := "biginteger"
-organization in ThisBuild := "ky.korins"
-version in ThisBuild := "1.0.0-SNAPSHOT"
-scalaVersion in ThisBuild := scala3
-crossScalaVersions in ThisBuild := Seq()
+ThisBuild / organization := "ky.korins"
+ThisBuild / version := "1.0.0-SNAPSHOT"
+ThisBuild / scalaVersion := scala3
+ThisBuild / crossScalaVersions := Seq()
 
-scalacOptions in ThisBuild ++= Seq(
+ThisBuild / scalacOptions ++= Seq(
   "-target:jvm-1.8",
   "-unchecked",
   "-deprecation"
@@ -24,7 +24,7 @@ licenses := LicenseDefinition.licenses
 headerLicense := LicenseDefinition.template
 
 // This code isn't ready to publishing yet
-publishTo in ThisBuild := None // sonatypePublishToBundle.value
+ThisBuild / publishTo := None // sonatypePublishToBundle.value
 
 lazy val biginteger = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .crossType(CrossType.Full)
@@ -32,8 +32,8 @@ lazy val biginteger = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .enablePlugins(BuildInfoPlugin)
   .enablePlugins(AutomateHeaderPlugin)
   .settings(
-    skip in publish := false,
-    publishArtifact in Test := false,
+    publish / skip := false,
+    Test / publishArtifact := false,
     buildInfoKeys := Seq(
       BuildInfoKey.action("commit") {
         scala.sys.process.Process("git rev-parse HEAD").!!.trim
@@ -70,24 +70,24 @@ lazy val bench = project.in(file("bench"))
       "org.openjdk.jmh" % "jmh-core" % jmhVersion,
       "org.openjdk.jmh" % "jmh-generator-annprocess" % jmhVersion,
     ),
-    skip in publish := true,
+    publish / skip := true,
     scalaVersion := scala213,
     crossScalaVersions := Seq(scala213),
-    assemblyJarName in assembly := "bench.jar",
-    mainClass in assembly := Some("org.openjdk.jmh.Main"),
-    test in assembly := {},
+    assembly / assemblyJarName := "bench.jar",
+    assembly / mainClass := Some("org.openjdk.jmh.Main"),
+    assembly / test := {},
     scalacOptions ++= Seq(
       "-opt:_",
       "-Xlint:_,-nonlocal-return,-unit-special",
     ),
     licenses := LicenseDefinition.licenses,
     headerLicense := LicenseDefinition.template,
-    excludeFilter in headerSources := HiddenFileFilter || {
+    headerSources / excludeFilter := HiddenFileFilter || {
       new SimpleFileFilter(_.getCanonicalPath contains "/original/")
     },
-    assemblyMergeStrategy in assembly := {
+    assembly / assemblyMergeStrategy := {
       case PathList("META-INF", "MANIFEST.MF") => MergeStrategy.discard
       case _ => MergeStrategy.first
     },
-    assembly in Jmh := (assembly in Jmh).dependsOn(Keys.compile in Jmh).value
+    Jmh / assembly := (Jmh / assembly).dependsOn(Jmh / Keys.compile).value
   )
