@@ -10,7 +10,8 @@ lazy val jmhVersion = "1.31"
 
 name := "biginteger"
 ThisBuild / organization := "ky.korins"
-ThisBuild / version := "1.0.0-SNAPSHOT"
+ThisBuild / dynverSeparator := "-"
+
 ThisBuild / scalaVersion := scala3
 ThisBuild / crossScalaVersions := Seq()
 
