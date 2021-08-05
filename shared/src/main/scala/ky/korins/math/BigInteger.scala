@@ -665,6 +665,8 @@ class BigInteger extends Number with Comparable[BigInteger] {
       BigInteger.ZERO
     } else if (base.sign == 0 && _exponent.sign == 0) {
       BigInteger.ONE
+    } else if (equals(ONE)) {
+      BigInteger.ONE
     } else {
       if (_exponent.sign < 0) {
         base = modInverse(m)
@@ -683,6 +685,8 @@ class BigInteger extends Number with Comparable[BigInteger] {
 
   def multiply(bi: BigInteger): BigInteger = {
     if (bi.sign == 0 || sign == 0) ZERO
+    else if (bi.equals(ONE)) this
+    else if (equals(ONE)) bi
     else Multiplication.multiply(this, bi)
   }
 
@@ -727,6 +731,11 @@ class BigInteger extends Number with Comparable[BigInteger] {
 
     if (numberLength < divisor.numberLength) {
       return this
+    }
+
+    if (isOne) {
+      if (sign == 1) return ONE
+      else divisor subtract ONE
     }
 
     if (divisor.numberLength >= Division.whenBurnikelZiegler &&
