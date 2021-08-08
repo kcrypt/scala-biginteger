@@ -304,18 +304,16 @@ private[math] object Division {
    *  @see #monPro(BigInteger, BigInteger, BigInteger, long)
    *  @see #monSquare(BigInteger, BigInteger, long)
    */
-  def finalSubtraction(res: Array[Int], modulus: BigInteger): Unit  = {
+  def finalSubtraction(res: Array[Int], mDigits: Array[Int], mNumberLength: Int): Unit  = {
     // skipping leading zeros
-    val modulusLen = modulus.numberLength
-    val modulusDigits = modulus.digits
-    var doSub = res(modulusLen) != 0
+    var doSub = res(mNumberLength) != 0
     if (!doSub) {
       doSub = true
-      var i = modulusLen - 1
+      var i = mNumberLength - 1
       while (i >= 0) {
-        if (res(i) != modulusDigits(i)) {
+        if (res(i) != mDigits(i)) {
           doSub =
-            (res(i) != 0) && ((res(i) & UINT_MAX) > (modulusDigits(i) & UINT_MAX))
+            (res(i) != 0) && ((res(i) & UINT_MAX) > (mDigits(i) & UINT_MAX))
           //force break
           i = 0
         }
@@ -324,7 +322,7 @@ private[math] object Division {
     }
 
     if (doSub)
-      subtract(res, res, modulusLen + 1, modulusDigits, modulusLen)
+      subtract(res, res, mNumberLength + 1, mDigits, mNumberLength)
   }
 
   /** Return the greatest common divisor of two BigIntegers
@@ -640,7 +638,7 @@ private[math] object Division {
     val modulusLen = modulus.numberLength
     val res = new Array[Int]((modulusLen << 1) + 1)
 
-    monPro(res, a.digits, b.digits, b.numberLength, modulus, n2)
+    monPro(res, a.digits, b.digits, b.numberLength, modulus.digits, modulusLen, n2)
 
     val result = new BigInteger(1, modulusLen + 1, res)
     result.cutOffLeadingZeroes()
@@ -659,14 +657,11 @@ private[math] object Division {
    * This is a mix of multiplication and montgomery reduction function
    */
   def monPro(res: Array[Int], aDigits: Array[Int], bDigits: Array[Int], bNumberLength: Int,
-    modulus: BigInteger, n2: Int): Array[Int] = {
-
-    val modulusDigits = modulus.digits
-    val modulusLen = modulus.numberLength
+    mDigits: Array[Int], mNumberLength: Int, n2: Int): Array[Int] = {
 
     Arrays.fill(res, 0)
-    val aLen = Math.min(modulusLen, numberLength(aDigits))
-    val bLen = Math.min(modulusLen, bNumberLength)
+    val aLen = Math.min(mNumberLength, numberLength(aDigits))
+    val bLen = Math.min(mNumberLength, bNumberLength)
 
     var carry: Long = 0 // unsigned
     val n2u = n2 & UINT_MAX
@@ -681,7 +676,7 @@ private[math] object Division {
       var modulusCarry = multiplyCarry & UINT_MAX
       val n0 = ((modulusCarry & UINT_MAX) * n2u) & UINT_MAX
 
-      modulusCarry += n0 * (modulusDigits(0) & UINT_MAX)
+      modulusCarry += n0 * (mDigits(0) & UINT_MAX)
       res(i) = modulusCarry.toInt
 
       modulusCarry >>>= 32
@@ -695,20 +690,20 @@ private[math] object Division {
         modulusCarry += multiplyCarry & UINT_MAX
         multiplyCarry >>>= 32
 
-        modulusCarry += n0 * (modulusDigits(j) & UINT_MAX)
+        modulusCarry += n0 * (mDigits(j) & UINT_MAX)
         res(idx) = modulusCarry.toInt
         modulusCarry >>>= 32
 
         j += 1
       }
       // j is bLen here
-      while (j < modulusLen) {
+      while (j < mNumberLength) {
         val idx = i + j
         multiplyCarry += (res(idx) & UINT_MAX)
         modulusCarry += multiplyCarry & UINT_MAX
         multiplyCarry >>>= 32
 
-        modulusCarry += n0 * (modulusDigits(j) & UINT_MAX)
+        modulusCarry += n0 * (mDigits(j) & UINT_MAX)
         res(idx) = modulusCarry.toInt
         modulusCarry >>>= 32
 
@@ -716,32 +711,32 @@ private[math] object Division {
       }
 
       carry += multiplyCarry + modulusCarry
-      res(i + modulusLen) = carry.toInt
+      res(i + mNumberLength) = carry.toInt
       carry >>>= 32
 
       i += 1
     }
     // i is aLen here
-    while (i < modulusLen) {
+    while (i < mNumberLength) {
       var multiplyCarry: Long = res(i) & UINT_MAX
 
       var modulusCarry = multiplyCarry & UINT_MAX
       val n0 = ((modulusCarry & UINT_MAX) * n2u) & UINT_MAX
 
-      modulusCarry += n0 * (modulusDigits(0) & UINT_MAX)
+      modulusCarry += n0 * (mDigits(0) & UINT_MAX)
       res(i) = modulusCarry.toInt
 
       modulusCarry >>>= 32
       multiplyCarry >>>= 32
 
       j = 1
-      while (j < modulusLen) {
+      while (j < mNumberLength) {
         val idx = i + j
         multiplyCarry += (res(idx) & UINT_MAX)
         modulusCarry += multiplyCarry & UINT_MAX
         multiplyCarry >>>= 32
 
-        modulusCarry += n0 * (modulusDigits(j) & UINT_MAX)
+        modulusCarry += n0 * (mDigits(j) & UINT_MAX)
         res(idx) = modulusCarry.toInt
         modulusCarry >>>= 32
 
@@ -749,16 +744,16 @@ private[math] object Division {
       }
 
       carry += multiplyCarry + modulusCarry
-      res(i + modulusLen) = carry.toInt
+      res(i + mNumberLength) = carry.toInt
       carry >>>= 32
 
       i += 1
     }
 
-    System.arraycopy(res, modulusLen, res, 0, modulusLen)
-    res(modulusLen) = carry.toInt
+    System.arraycopy(res, mNumberLength, res, 0, mNumberLength)
+    res(mNumberLength) = carry.toInt
 
-    finalSubtraction(res, modulus)
+    finalSubtraction(res, mDigits, mNumberLength)
     res
   }
 
@@ -766,7 +761,7 @@ private[math] object Division {
     val modulusLen = modulus.numberLength
     val res = new Array[Int]((modulusLen << 1) + 1)
 
-    monSquare(res, a.digits, modulus, n2)
+    monSquare(res, a.digits, modulus.digits, modulusLen, n2)
 
     val result = new BigInteger(1, modulusLen + 1, res)
     result.cutOffLeadingZeroes()
@@ -776,12 +771,10 @@ private[math] object Division {
   /**
    * This is a mix of square multiplication with bitshift and montgomery reduction function
    */
-  def monSquare(res: Array[Int], aDigits: Array[Int], modulus: BigInteger, n2: Int): Array[Int] = {
-    val modulusDigits = modulus.digits
-    val modulusLen = modulus.numberLength
+  def monSquare(res: Array[Int], aDigits: Array[Int], mDigits: Array[Int], mNumberLength: Int, n2: Int): Array[Int] = {
 
     Arrays.fill(res, 0)
-    val aLen = Math.min(modulusLen, numberLength(aDigits))
+    val aLen = Math.min(mNumberLength, numberLength(aDigits))
 
     var shiftCarry: Long = 0
     var lastLeftBit = 0
@@ -826,28 +819,28 @@ private[math] object Division {
     var outerCarry: Long = 0 // unsigned
     val n2u = n2 & UINT_MAX
     i = 0
-    while (i < modulusLen) {
+    while (i < mNumberLength) {
       var innerCarry: Long = 0 // unsigned
       val m = ((res(i) & UINT_MAX) * n2u) & UINT_MAX
       var j = 0
-      while (j < modulusLen) {
+      while (j < mNumberLength) {
         val idx = i + j
-        innerCarry = m * (modulusDigits(j) & UINT_MAX) + (res(idx) & UINT_MAX) + innerCarry
+        innerCarry = m * (mDigits(j) & UINT_MAX) + (res(idx) & UINT_MAX) + innerCarry
         res(idx) = innerCarry.toInt
         innerCarry >>>= 32
         j += 1
       }
-      val idx = i + modulusLen
+      val idx = i + mNumberLength
       outerCarry = outerCarry + (res(idx) & UINT_MAX) + innerCarry
       res(idx) = outerCarry.toInt
       outerCarry >>>= 32
       i += 1
     }
 
-    System.arraycopy(res, modulusLen, res, 0, modulusLen)
-    res(modulusLen) = (shiftCarry + outerCarry).toInt
+    System.arraycopy(res, mNumberLength, res, 0, mNumberLength)
+    res(mNumberLength) = (shiftCarry + outerCarry).toInt
 
-    finalSubtraction(res, modulus)
+    finalSubtraction(res, mDigits, mNumberLength)
     res
   }
 
@@ -903,7 +896,7 @@ private[math] object Division {
     // Compute (modulus[0]^(-1)) (mod 2^32) for odd modulus
     val n2 = calcN(modulus)
     val res =
-      if (modulus.numberLength == 1) squareAndMultiply(x2, a2, exponent, modulus, n2)
+      if (modulus.numberLength == 1) squareAndMultiply(x2, a2, exponent, modulus.digits, modulus.numberLength, n2)
       else slidingWindow(x2, a2, exponent, modulus, n2)
     monPro(res, BigInteger.ONE, modulus, n2)
   }
@@ -1003,10 +996,11 @@ private[math] object Division {
     val windowSize = slidingWindowSize(exponent.bitLength())
     val tableSize = 1 << windowSize
 
-    val modulusLen = modulus.numberLength
-    var res_current = new Array[Int]((modulusLen << 1) + 1)
-    var res_last = new Array[Int]((modulusLen << 1) + 1)
-    System.arraycopy(x2.digits, 0, res_last, 0, Math.min(modulusLen, x2.numberLength))
+    val mDigits = modulus.digits
+    val mNumberLength = modulus.numberLength
+    var res_current = new Array[Int]((mNumberLength << 1) + 1)
+    var res_last = new Array[Int]((mNumberLength << 1) + 1)
+    System.arraycopy(x2.digits, 0, res_last, 0, Math.min(mNumberLength, x2.numberLength))
 
     // fill odd low pows of a2
     val pows = new Array[BigInteger](tableSize)
@@ -1039,50 +1033,49 @@ private[math] object Division {
         }
         j = acc3
         while (j <= i) {
-          val res = monSquare(res_current, res_last, modulus, n2)
+          val res = monSquare(res_current, res_last, mDigits, mNumberLength, n2)
           res_current = res_last
           res_last = res
           j += 1
         }
         val pow = pows((lowexp - 1) >> 1)
-        val res = monPro(res_current, res_last, pow.digits, pow.numberLength, modulus, n2)
+        val res = monPro(res_current, res_last, pow.digits, pow.numberLength, mDigits, mNumberLength, n2)
         res_current = res_last
         res_last = res
         i = acc3
       } else {
-        val res = monSquare(res_current, res_last, modulus, n2)
+        val res = monSquare(res_current, res_last, mDigits, mNumberLength, n2)
         res_current = res_last
         res_last = res
       }
       i -= 1
     }
 
-    val result = new BigInteger(1, modulusLen + 1, res_last)
+    val result = new BigInteger(1, mNumberLength + 1, res_last)
     result.cutOffLeadingZeroes()
     result
   }
 
   def squareAndMultiply(x2: BigInteger, a2: BigInteger, exponent: BigInteger,
-      modulus: BigInteger, n2: Int): BigInteger = {
-    val modulusLen = modulus.numberLength
-    var res_current = new Array[Int]((modulusLen << 1) + 1)
-    var res_last = new Array[Int]((modulusLen << 1) + 1)
+    mDigits: Array[Int], mNumberLength: Int, n2: Int): BigInteger = {
+    var res_current = new Array[Int]((mNumberLength << 1) + 1)
+    var res_last = new Array[Int]((mNumberLength << 1) + 1)
 
-    System.arraycopy(x2.digits, 0, res_last, 0, Math.min(modulusLen, x2.numberLength))
+    System.arraycopy(x2.digits, 0, res_last, 0, Math.min(mNumberLength, x2.numberLength))
     var i = exponent.bitLength() - 1
     while (i >= 0) {
-      val res = monSquare(res_current, res_last, modulus, n2)
+      val res = monSquare(res_current, res_last, mDigits, mNumberLength, n2)
       res_current = res_last
       res_last = res
       if (BitLevel.testBit(exponent, i)) {
-        val res = monPro(res_current, res_last, a2.digits, a2.numberLength, modulus, n2)
+        val res = monPro(res_current, res_last, a2.digits, a2.numberLength, mDigits, mNumberLength, n2)
         res_current = res_last
         res_last = res
       }
       i -= 1
     }
 
-    val result = new BigInteger(1, modulusLen + 1, res_last)
+    val result = new BigInteger(1, mNumberLength + 1, res_last)
     result.cutOffLeadingZeroes()
     result
   }
