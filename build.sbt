@@ -10,7 +10,7 @@ lazy val scalatestVersion = "3.2.10"
 lazy val jmhVersion = "1.34"
 
 name := "biginteger"
-ThisBuild / organization := "ky.korins"
+ThisBuild / organization := "pt.kcry"
 ThisBuild / dynverSeparator := "-"
 
 ThisBuild / scalaVersion := scala30
@@ -45,7 +45,7 @@ lazy val biginteger = crossProject(JSPlatform, JVMPlatform, NativePlatform)
         scala.sys.process.Process("git rev-parse HEAD").!!.trim
       }
     ),
-    buildInfoPackage := "ky.korins.math",
+    buildInfoPackage := "pt.kcry.biginteger",
     libraryDependencies ++= Seq(
       "org.scalatest" %%% "scalatest" % scalatestVersion % Test,
     ),

@@ -1,18 +1,25 @@
 import sbt.url
 import xerial.sbt.Sonatype.GitHubHosting
 
-publishMavenStyle in ThisBuild := true
-sonatypeProjectHosting in ThisBuild := Some(GitHubHosting("catap", "scala-biginteger", "kirill@korins.ky"))
-licenses in ThisBuild := Seq(
-  "Apache-2.0" -> url("https://github.com/catap/scala-biginteger/blob/master/LICENSE.txt")
+ThisBuild / sonatypeProfileName := "pt.kcry"
+ThisBuild / publishMavenStyle := true
+ThisBuild / sonatypeProjectHosting := Some(
+  GitHubHosting("kcrypt", "scala-biginteger", "k@kcry.pt")
 )
-homepage in ThisBuild := Some(url("https://github.com/catap/scala-biginteger"))
-scmInfo in ThisBuild := Some(
+ThisBuild / licenses := LicenseDefinition.licenses
+ThisBuild / homepage := Some(url("https://github.com/kcrypt/scala-biginteger"))
+ThisBuild / scmInfo := Some(
   ScmInfo(
-    url("https://github.com/catap/scala-biginteger"),
-    "scm:git@github.com:catap/scala-biginteger.git"
+    url("https://github.com/kcrypt/scala-biginteger"),
+    "scm:git@github.com:kcrypt/scala-biginteger.git"
   )
 )
-developers in ThisBuild := List(
-  Developer(id="catap", name="Kirill A. Korinsky", email="kirill@korins.ky", url=url("https://github.com/catap"))
+ThisBuild / developers := List(
+  Developer(
+    id = "catap",
+    name = "Kirill A. Korinsky",
+    email = "kirill@korins.ky",
+    url = url("https://github.com/catap")
+  )
 )
+ThisBuild / sonatypeCredentialHost := "s01.oss.sonatype.org"
