@@ -3,7 +3,8 @@ import sbtcrossproject.CrossPlugin.autoImport.crossProject
 lazy val scala211 = "2.11.12"
 lazy val scala212 = "2.12.15"
 lazy val scala213 = "2.13.7"
-lazy val scala3 = "3.0.0"
+lazy val scala30 = "3.0.0"
+lazy val scala31 = "3.1.0"
 
 lazy val scalatestVersion = "3.2.10"
 lazy val jmhVersion = "1.34"
@@ -12,7 +13,7 @@ name := "biginteger"
 ThisBuild / organization := "ky.korins"
 ThisBuild / dynverSeparator := "-"
 
-ThisBuild / scalaVersion := scala3
+ThisBuild / scalaVersion := scala30
 ThisBuild / crossScalaVersions := Seq()
 
 ThisBuild / scalacOptions ++= Seq(
@@ -33,7 +34,11 @@ lazy val biginteger = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .enablePlugins(BuildInfoPlugin)
   .enablePlugins(AutomateHeaderPlugin)
   .settings(
-    publish / skip := false,
+    // Don't publish for Scala 3.1 or later, only from 3.0
+    publish / skip := (CrossVersion.partialVersion(scalaVersion.value) match {
+      case Some((3, x)) if x > 0 => true
+      case _                     => false
+    }),
     Test / publishArtifact := false,
     buildInfoKeys := Seq(
       BuildInfoKey.action("commit") {
@@ -48,12 +53,12 @@ lazy val biginteger = crossProject(JSPlatform, JVMPlatform, NativePlatform)
     headerLicense := LicenseDefinition.template
   )
   .jvmSettings(
-    scalaVersion := scala3,
-    crossScalaVersions := Seq(scala212, scala211, scala213, scala3)
+    scalaVersion := scala30,
+    crossScalaVersions := Seq(scala212, scala211, scala213, scala30, scala31)
   )
   .jsSettings(
-    scalaVersion := scala3,
-    crossScalaVersions := Seq(scala211, scala212, scala213, scala3),
+    scalaVersion := scala30,
+    crossScalaVersions := Seq(scala211, scala212, scala213, scala30, scala31),
     Test / scalaJSStage := FullOptStage
   )
   .nativeSettings(
