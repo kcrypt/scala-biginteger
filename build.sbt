@@ -26,8 +26,7 @@ ThisBuild / scalacOptions ++= Seq(
 licenses := LicenseDefinition.licenses
 headerLicense := LicenseDefinition.template
 
-// This code isn't ready to publishing yet
-ThisBuild / publishTo := None // sonatypePublishToBundle.value
+ThisBuild / publishTo := sonatypePublishToBundle.value
 
 lazy val biginteger = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .crossType(CrossType.Full)
