@@ -1,5 +1,6 @@
 import sbtcrossproject.CrossPlugin.autoImport.crossProject
 
+lazy val scala210 = "2.10.7"
 lazy val scala211 = "2.11.12"
 lazy val scala212 = "2.12.15"
 lazy val scala213 = "2.13.7"
@@ -54,7 +55,7 @@ lazy val biginteger = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   )
   .jvmSettings(
     scalaVersion := scala30,
-    crossScalaVersions := Seq(scala212, scala211, scala213, scala30, scala31)
+    crossScalaVersions := Seq(scala210, scala212, scala211, scala213, scala30, scala31)
   )
   .jsSettings(
     scalaVersion := scala30,
