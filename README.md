@@ -2,6 +2,12 @@
 
 This is highly optimized implementation of BigInteger on scala for scala, scala-js and scala-native.
 
+You can use it as
+```
+libraryDependencies += "pt.kcry" %%% "biginteger" % "x.x.x"
+```
+The latest version is ![maven-central]
+
 As the base it is used scala-js implementation that was ported from java by Alistair Johnson
  that is technically GWT/Harmony/IBM JDK implementation.
 
@@ -43,3 +49,5 @@ Short summary:
 
 Full version also available as [jmh-result.json](jmh-result.json)
  or via [JMH Visualizer](https://jmh.morethan.io/?gist=70a1ff7e2e4fa8b0102219e99f64b00a).
+
+[maven-central]: https://img.shields.io/maven-central/v/pt.kcry/biginteger_2.13?style=flat-square
