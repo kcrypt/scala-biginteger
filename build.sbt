@@ -8,7 +8,7 @@ lazy val scala30 = "3.0.2"
 lazy val scala31 = "3.1.0"
 
 lazy val scalatestVersion = "3.2.10"
-lazy val jmhVersion = "1.34"
+lazy val jmhVersion = "1.35"
 
 name := "biginteger"
 ThisBuild / organization := "pt.kcry"
