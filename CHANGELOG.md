@@ -3,6 +3,7 @@
 All notable changes to this project will be documented in this file.
 
 ## [unreleased]
+- Switched to scala-3.1.2
 
 ## [1.0.0] - 2021-12-24
 - The first public release as dedicated project.
