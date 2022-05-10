@@ -33,11 +33,6 @@ lazy val biginteger = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .enablePlugins(BuildInfoPlugin)
   .enablePlugins(AutomateHeaderPlugin)
   .settings(
-    // Don't publish for Scala 3.1 or later, only from 3.0
-    publish / skip := (CrossVersion.partialVersion(scalaVersion.value) match {
-      case Some((3, x)) if x > 0 => true
-      case _                     => false
-    }),
     Test / publishArtifact := false,
     buildInfoKeys := Seq(
       BuildInfoKey.action("commit") {
