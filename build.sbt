@@ -4,17 +4,16 @@ lazy val scala210 = "2.10.7"
 lazy val scala211 = "2.11.12"
 lazy val scala212 = "2.12.15"
 lazy val scala213 = "2.13.8"
-lazy val scala30 = "3.0.2"
-lazy val scala31 = "3.1.1"
+lazy val scala31 = "3.1.2"
 
-lazy val scalatestVersion = "3.2.10"
+lazy val scalatestVersion = "3.2.12"
 lazy val jmhVersion = "1.35"
 
 name := "biginteger"
 ThisBuild / organization := "pt.kcry"
 ThisBuild / dynverSeparator := "-"
 
-ThisBuild / scalaVersion := scala30
+ThisBuild / scalaVersion := scala31
 ThisBuild / crossScalaVersions := Seq()
 
 ThisBuild / scalacOptions ++= Seq(
@@ -53,17 +52,14 @@ lazy val biginteger = crossProject(JSPlatform, JVMPlatform, NativePlatform)
     headerLicense := LicenseDefinition.template
   )
   .jvmSettings(
-    scalaVersion := scala30,
-    crossScalaVersions := Seq(scala210, scala212, scala211, scala213, scala30, scala31)
+    crossScalaVersions := Seq(scala210, scala212, scala211, scala213, scala31)
   )
   .jsSettings(
-    scalaVersion := scala30,
-    crossScalaVersions := Seq(scala211, scala212, scala213, scala30, scala31),
+    crossScalaVersions := Seq(scala211, scala212, scala213, scala31),
     Test / scalaJSStage := FullOptStage
   )
   .nativeSettings(
-    scalaVersion := scala213,
-    crossScalaVersions := Seq(scala211, scala212, scala213),
+    crossScalaVersions := Seq(scala211, scala212, scala213, scala31),
     Test / nativeMode:= "release-fast",
     Test / nativeLinkStubs := true
   )
