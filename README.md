@@ -12,7 +12,7 @@ As the base it is used scala-js implementation that was ported from java by Alis
  that is technically GWT/Harmony/IBM JDK implementation.
 
 All this optimization mainly focused to less sweepings and highest performance on `mod`, `modPow` and `isProbablePrime`.
-As side effect I've optimized `devide`, `reminder`, `nextProbablePrime` and something near.
+As side effect I've optimized `divide`, `remainder`, `nextProbablePrime` and something near.
 
 Summary of optimizations:
  - replaced `for` loop to `while`
