@@ -2,9 +2,9 @@ import sbtcrossproject.CrossPlugin.autoImport.crossProject
 
 lazy val scala210 = "2.10.7"
 lazy val scala211 = "2.11.12"
-lazy val scala212 = "2.12.17"
-lazy val scala213 = "2.13.10"
-lazy val scala31 = "3.2.0"
+lazy val scala212 = "2.12.19"
+lazy val scala213 = "2.13.13"
+lazy val scala3 = "3.4.0"
 
 lazy val scalatestVersion = "3.2.18"
 lazy val jmhVersion = "1.37"
@@ -13,7 +13,7 @@ name := "biginteger"
 ThisBuild / organization := "pt.kcry"
 ThisBuild / dynverSeparator := "-"
 
-ThisBuild / scalaVersion := scala31
+ThisBuild / scalaVersion := scala3
 ThisBuild / crossScalaVersions := Seq()
 
 ThisBuild / scalacOptions ++= Seq(
@@ -47,14 +47,14 @@ lazy val biginteger = crossProject(JSPlatform, JVMPlatform, NativePlatform)
     headerLicense := LicenseDefinition.template
   )
   .jvmSettings(
-    crossScalaVersions := Seq(scala210, scala212, scala211, scala213, scala31)
+    crossScalaVersions := Seq(scala210, scala212, scala211, scala213, scala3)
   )
   .jsSettings(
-    crossScalaVersions := Seq(scala211, scala212, scala213, scala31),
+    crossScalaVersions := Seq(scala212, scala213, scala3),
     Test / scalaJSStage := FullOptStage
   )
   .nativeSettings(
-    crossScalaVersions := Seq(scala211, scala212, scala213, scala31),
+    crossScalaVersions := Seq(scala212, scala213, scala3),
     Test / nativeMode:= "release-fast",
     Test / nativeLinkStubs := true
   )
