@@ -5,7 +5,7 @@ addSbtPlugin("org.scala-js"       % "sbt-scalajs"                   % "1.15.0")
 addSbtPlugin("org.scala-native"   % "sbt-scala-native"              % "0.4.17")
 
 addSbtPlugin("pl.project13.scala" % "sbt-jmh"                       % "0.4.7")
-addSbtPlugin("com.eed3si9n"       % "sbt-assembly"                  % "2.1.5")
+addSbtPlugin("com.eed3si9n"       % "sbt-assembly"                  % "2.2.0")
 addSbtPlugin("com.github.sbt"   % "sbt-native-packager"           % "1.9.16")
 addSbtPlugin("com.eed3si9n"       % "sbt-buildinfo"                 % "0.11.0")
 addSbtPlugin("com.github.sbt"       % "sbt-pgp"                       % "2.2.1")
