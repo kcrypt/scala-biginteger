@@ -54,10 +54,7 @@ lazy val biginteger = crossProject(JSPlatform, JVMPlatform, NativePlatform)
     Test / scalaJSStage := FullOptStage
   )
   .nativeSettings(
-    crossScalaVersions := Seq(scala212, scala213, scala3),
-    Test / nativeMode:= "release-fast",
-    Test / nativeLinkStubs := true
-  )
+    crossScalaVersions := Seq(scala212, scala213, scala3))
 
 lazy val bench = project.in(file("bench"))
   .enablePlugins(JavaAppPackaging)
